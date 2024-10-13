@@ -1,7 +1,7 @@
 {
-  "name": "gamemode2",
+  "name": "Siege",
   "author": "Nilederg",
-  "main": "main.GamemodeMain",
+  "main": "siege.SiegePlugin",
   "description": "Plugin for ACP's second gamemode",
-  "version": 0
+  "version": "Alpha"
 }
