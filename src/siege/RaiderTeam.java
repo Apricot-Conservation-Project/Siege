@@ -20,11 +20,12 @@ public class RaiderTeam {
             for (RaiderTeam team : SiegePlugin.gamedata.raiderTeams) {
                 if (team.id == id) {
                     collision = true;
+                    break;
                 }
             }
         }
 
-        players = new ArrayList<Player>();
+        players = new ArrayList<>();
         open = false;
     }
 
@@ -54,7 +55,7 @@ public class RaiderTeam {
          * @param handler The CommandHandler passed from the Plugin superclass
          */
         public static void registerCommands(CommandHandler handler) {
-            handler.<Player>register("team", "[command] [argument]", "Run /team to list team commands.", Commands::teamCommand);
+            handler.register("team", "[command] [argument]", "Run /team to list team commands.", Commands::teamCommand);
         }
 
         /**

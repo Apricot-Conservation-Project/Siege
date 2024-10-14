@@ -2,17 +2,9 @@ package siege;
 
 import arc.*;
 import arc.util.*;
-import mindustry.*;
-import mindustry.content.*;
-import mindustry.core.GameState;
 import mindustry.game.EventType;
-import mindustry.game.EventType.*;
 import mindustry.gen.*;
 import mindustry.mod.*;
-import mindustry.net.Administration.*;
-import mindustry.world.blocks.storage.*;
-
-import java.util.Set;
 
 public class SiegePlugin extends Plugin {
     public static Gamedata gamedata;
@@ -40,9 +32,9 @@ public class SiegePlugin extends Plugin {
      * @param winner The game's winner. 0 if the Citadel wins, otherwise is the ID of the winning team. -1 if the game is ended without a winner.
      */
     public void endGame(int winner) {
-        switch (winner) {
+        /*switch (winner) {
             // ???
-        }
+        }*/
     }
 
     // Manages constant processes that happen always
@@ -52,15 +44,11 @@ public class SiegePlugin extends Plugin {
 
     // Manages constant processes after setup
     private void gameUpdate() {
-        //
+        checkTeams();
     }
 
     private void checkTeams() {
-        for (RaiderTeam team : gamedata.raiderTeams) {
-            if (team.players.isEmpty()) {
-                gamedata.raiderTeams.remove(team);
-            }
-        }
+        gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
 
         if (gamedata.raiderTeams.isEmpty()) {
             endGame(0);

@@ -6,11 +6,11 @@ import java.util.List;
 public class Gamedata {
     public List<RaiderTeam> raiderTeams;
     public long startTime;
-    public int mapIndex;
+    //public int mapIndex;
 
     public Gamedata() {
         startTime = System.currentTimeMillis() + 1000 * SiegePlugin.SETUP_TIME_SECONDS;
-        raiderTeams = new ArrayList<RaiderTeam>();
+        raiderTeams = new ArrayList<>();
     }
 
     /**
