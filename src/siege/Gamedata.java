@@ -1,5 +1,6 @@
 package siege;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Gamedata {
@@ -9,6 +10,7 @@ public class Gamedata {
 
     public Gamedata() {
         startTime = System.currentTimeMillis() + 1000 * SiegePlugin.SETUP_TIME_SECONDS;
+        raiderTeams = new ArrayList<RaiderTeam>();
     }
 
     /**
