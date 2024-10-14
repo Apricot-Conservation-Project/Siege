@@ -3,6 +3,7 @@ apply plugin: "java"
 version '1.0'
 
 sourceCompatibility = JavaVersion.VERSION_20
+targetCompatibility = JavaVersion.VERSION_20
 
 sourceSets.main.java.srcDirs = ["src"]
 
@@ -21,11 +22,10 @@ ext{
     jabelVersion = "93fde537c7"
 }
 
-//java 8 backwards compatibility flag
 allprojects{
     tasks.withType(JavaCompile).tap {
         configureEach {
-            options.compilerArgs.addAll(['--release', '8'])
+            options.compilerArgs.clear()
         }
     }
 }
@@ -33,6 +33,7 @@ allprojects{
 dependencies{
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    implementation "com.github.Apricot-Conservation-Project:base:8708244"
     annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
 }
 
