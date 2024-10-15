@@ -8,7 +8,6 @@ import mindustry.mod.*;
 
 public class SiegePlugin extends Plugin {
     public static Gamedata gamedata;
-    public static final int SETUP_TIME_SECONDS = 3 * 60;
 
     @Override
     public void init() {
@@ -39,7 +38,7 @@ public class SiegePlugin extends Plugin {
 
     // Manages constant processes that happen always
     private void alwaysUpdate() {
-        //
+        PersistentPlayer.updatePlayers();
     }
 
     // Manages constant processes after setup

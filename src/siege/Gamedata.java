@@ -9,7 +9,7 @@ public class Gamedata {
     //public int mapIndex;
 
     public Gamedata() {
-        startTime = System.currentTimeMillis() + 1000 * SiegePlugin.SETUP_TIME_SECONDS;
+        startTime = System.currentTimeMillis() + 1000 * Constants.SETUP_TIME_SECONDS;
         raiderTeams = new ArrayList<>();
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class RaiderTeam {
     public int id;
-    public List<Player> players;
+    public List<PersistentPlayer> players;
     public boolean open;
 
     public RaiderTeam() {
@@ -31,7 +31,7 @@ public class RaiderTeam {
 
     public RaiderTeam(Player initialPlayer) {
         this();
-        players.add(initialPlayer);
+        players.add(PersistentPlayer.fromPlayer(initialPlayer));
     }
 
     /**
@@ -113,7 +113,11 @@ public class RaiderTeam {
                 executor.sendMessage("\n[accent]Team ID: [blue]" + team.id);
 
                 team.players.forEach(player -> {
-                    executor.sendMessage("      [accent]Player ID: [blue]" + player.id + ":[white] " + player.name);
+                    String message = "      [accent]Player ID: [blue]" + player.player.id + ":[white] " + player.player.name;
+                    if (!player.online) {
+                        message += " [white]([red]offline[white])";
+                    }
+                    executor.sendMessage(message);
                 });
             });
 
