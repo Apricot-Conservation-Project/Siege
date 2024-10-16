@@ -39,7 +39,7 @@ public class RaiderTeam {
      * @param player Any player
      * @return The player's team if they are in one, otherwise null
      */
-    public static RaiderTeam getTeam(Player player) {
+    public static RaiderTeam getTeam(PersistentPlayer player) {
         for (RaiderTeam team : SiegePlugin.gamedata.raiderTeams) {
             if (team.players.contains(player)) {
                 return team;
@@ -113,7 +113,7 @@ public class RaiderTeam {
                 executor.sendMessage("\n[accent]Team ID: [blue]" + team.id);
 
                 team.players.forEach(player -> {
-                    String message = "      [accent]Player ID: [blue]" + player.player.id + ":[white] " + player.player.name;
+                    String message = "      [accent]Player ID: [blue]" + player.currentPlayer.id + ":[white] " + player.currentPlayer.name;
                     if (!player.online) {
                         message += " [white]([red]offline[white])";
                     }
@@ -155,8 +155,9 @@ public class RaiderTeam {
         }
 
         private static void teamsCreate(Player executor) {
-            if (getTeam(executor) != null) {
+            if (getTeam(PersistentPlayer.fromPlayer(executor)) != null) {
                 executor.sendMessage("[red]You are already in a team!");
+                return;
             }
 
             RaiderTeam newTeam = new RaiderTeam(executor);
@@ -167,7 +168,7 @@ public class RaiderTeam {
         }
 
         private static void teamsOpen(Player executor) {
-            RaiderTeam team = getTeam(executor);
+            RaiderTeam team = getTeam(PersistentPlayer.fromPlayer(executor));
 
             if (team == null) {
                 executor.sendMessage("[red]You are not currently in a team!");
@@ -179,7 +180,7 @@ public class RaiderTeam {
         }
 
         private static void teamsClose(Player executor) {
-            RaiderTeam team = getTeam(executor);
+            RaiderTeam team = getTeam(PersistentPlayer.fromPlayer(executor));
 
             if (team == null) {
                 executor.sendMessage("[red]You are not currently in a team!");

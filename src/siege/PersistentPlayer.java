@@ -7,7 +7,8 @@ import java.util.List;
 
 public class PersistentPlayer {
     public boolean online;
-    public Player player;
+    public long lastSeen;
+    public Player currentPlayer;
     private static List<PersistentPlayer> players = new ArrayList<>();
 
     /**
@@ -17,8 +18,10 @@ public class PersistentPlayer {
      */
     public static PersistentPlayer fromPlayer(Player targetPlayer) {
         for (PersistentPlayer persistentPlayer : players) {
-            // TODO Compare UUID or other identifying feature to grab the same persistentPlayer after a player disconnects and reconnects
-            if (persistentPlayer.player.equals(targetPlayer)) {
+            if (persistentPlayer.currentPlayer.uuid().equals(targetPlayer.uuid())) {
+                return persistentPlayer;
+            }
+            if (persistentPlayer.currentPlayer.equals(targetPlayer)) {
                 return persistentPlayer;
             }
         }
@@ -28,7 +31,7 @@ public class PersistentPlayer {
 
     // Private constructor, because fromPlayer should be used instead.
     private PersistentPlayer(Player p) {
-        player = p;
+        currentPlayer = p;
         online = true;
         players.add(this);
     }
