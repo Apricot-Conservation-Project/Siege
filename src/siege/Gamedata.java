@@ -21,6 +21,13 @@ public class Gamedata {
     }
 
     /**
+     * @return Whether team configuration is still allowed
+     */
+    public boolean teamSetupPhase() {
+        return elapsedTimeSeconds() < -Constants.CORE_PLACEMENT_TIME_SECONDS;
+    }
+
+    /**
      * @return The number of seconds since the game's start time (end of setup). Will be negative if setup is still ongoing.
      */
     public long elapsedTimeSeconds() {

@@ -69,17 +69,34 @@ public class RaiderTeam {
                 return;
             }
 
-            switch (args[0]) {
-                case "help":     teamsHelp(executor); break;
-                case "list":     teamsList(executor); break;
-                case "invite": teamsInvite(executor, args[1]); break;
-                case "join":     teamsJoin(executor, args[1]); break;
-                case "quit":     teamsQuit(executor); break;
-                case "create": teamsCreate(executor); break;
-                case "open":     teamsOpen(executor); break;
-                case "close":   teamsClose(executor); break;
-                case "kick":     teamsKick(executor, args[1]); break;
-                default: executor.sendMessage("[red]Invalid command. Try running /team help.");
+            final List<String> commands = List.of(new String[]{"help", "list", "invite", "join", "quit", "create", "open", "close", "kick"});
+
+            if (!commands.contains(args[0])) {
+                executor.sendMessage("[red]Invalid command. Try running /team help.");
+                return;
+            }
+
+            if (SiegePlugin.gamedata.teamSetupPhase()) {
+                switch (args[0]) {
+                    case "help":     teamsHelp(executor); return;
+                    case "list":     teamsList(executor); return;
+                    case "invite": teamsInvite(executor, args[1]); return;
+                    case "join":     teamsJoin(executor, args[1]); return;
+                    case "quit":     teamsQuit(executor); return;
+                    case "create": teamsCreate(executor); return;
+                    case "open":     teamsOpen(executor); return;
+                    case "close":   teamsClose(executor); return;
+                    case "kick":     teamsKick(executor, args[1]); return;
+                    default: System.out.println("Unreachable state. Error code 345374");
+                }
+            } else {
+                switch (args[0]) {
+                    case "help":     teamsHelp(executor); return;
+                    case "list":     teamsList(executor); return;
+                    case "quit":     teamsQuit(executor); return;
+                    case "kick":     teamsKick(executor, args[1]); return;
+                    default: executor.sendMessage("[red]This subcommand is no longer allowed, as the game has begun. Check /team list for available team commands.");
+                }
             }
         }
 
@@ -87,15 +104,24 @@ public class RaiderTeam {
          * Sends a help message listing the team commands
          */
         private static void teamsHelp(Player executor) {
-            String output =
-                    "\n[orange]team list[white]: List all current Raider teams." +
-                    "\n[orange]team invite [yellow]<player name/ID>[white]: Invite a player to your team, or accept a join request." +
-                    "\n[orange]team join [yellow]<team ID>[white]: Request to join a team, or accept a team's invitation." +
-                    "\n[orange]team quit[white]: Quit your team and return to the Citadel team. You may attempt to join a new team afterward." +
-                    "\n[orange]team create[white]: Create a new team." +
-                    "\n[orange]team open[white]: Allow any player to join your team without approval." +
-                    "\n[orange]team close[white]: Cease allowing players to join your team without approval." +
-                    "\n[orange]team kick [yellow]<player name/ID>[white]: Start a vote to remove a player from your team.\n";
+            String output;
+            if (SiegePlugin.gamedata.gameStarted()) {
+                output =
+                        "\n[orange]team list[white]: List all current Raider teams." +
+                        "\n[orange]team quit[white]: Quit your team and return to the Citadel team. You may attempt to join a new team afterward." +
+                        "\n[orange]team kick [yellow]<player name/ID>[white]: Start a vote to remove a player from your team.\n";
+            } else {
+                output =
+                        "\n[accent]Currently in team setup phase." +
+                        "\n[orange]team list[white]: List all current Raider teams." +
+                        "\n[orange]team invite [yellow]<player name/ID>[white]: Invite a player to your team, or accept a join request." +
+                        "\n[orange]team join [yellow]<team ID>[white]: Request to join a team, or accept a team's invitation." +
+                        "\n[orange]team quit[white]: Quit your team and return to the Citadel team. You may attempt to join a new team afterward." +
+                        "\n[orange]team create[white]: Create a new team." +
+                        "\n[orange]team open[white]: Allow any player to join your team without approval." +
+                        "\n[orange]team close[white]: Cease allowing players to join your team without approval." +
+                        "\n[orange]team kick [yellow]<player name/ID>[white]: Start a vote to remove a player from your team.\n";
+            }
 
             executor.sendMessage(output);
         }
@@ -143,9 +169,10 @@ public class RaiderTeam {
         }
 
         private static void teamsQuit(Player executor) {
+            PersistentPlayer persistentExecutor = PersistentPlayer.fromPlayer(executor);
             for (RaiderTeam team : SiegePlugin.gamedata.raiderTeams) {
-                if (team.players.contains(executor)) {
-                    team.players.remove(executor);
+                if (team.players.contains(persistentExecutor)) {
+                    team.players.remove(persistentExecutor);
                     executor.sendMessage("[accent]Left team [blue]" + team.id);
                     return;
                 }
