@@ -36,9 +36,11 @@ public class PersistentPlayer {
         players.add(this);
     }
 
+
     /**
      * Updates the status of all players. Should be called frequently.
      */
+    /*
     public static void updatePlayers() {
         for (PersistentPlayer player : players) {
             player.update();
@@ -47,7 +49,9 @@ public class PersistentPlayer {
 
     // Updates the player's status.
     private void update() {
+        System.out.println(currentPlayer.);
+        //if (currentPlayer.lastUpdated)
         // check if an online player goes offline
         // check if an offline player comes online
-    }
+    }*/
 }

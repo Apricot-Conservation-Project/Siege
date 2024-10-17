@@ -24,6 +24,18 @@ public class SiegePlugin extends Plugin {
                 gameUpdate();
             }
         });
+
+        Events.on(EventType.PlayerConnect.class, event -> {
+            //
+        });
+
+        Events.on(EventType.PlayerJoin.class, event -> {
+            PersistentPlayer.fromPlayer(event.player).online = true;
+        });
+
+        Events.on(EventType.PlayerLeave.class, event -> {
+            PersistentPlayer.fromPlayer(event.player).online = false;
+        });
     }
 
     /**
@@ -38,7 +50,7 @@ public class SiegePlugin extends Plugin {
 
     // Manages constant processes that happen always
     private void alwaysUpdate() {
-        PersistentPlayer.updatePlayers();
+        //PersistentPlayer.updatePlayers();
     }
 
     // Manages constant processes after setup
