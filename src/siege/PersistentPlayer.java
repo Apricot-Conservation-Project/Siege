@@ -21,7 +21,7 @@ public class PersistentPlayer {
             if (persistentPlayer.currentPlayer.uuid().equals(targetPlayer.uuid())) {
                 return persistentPlayer;
             }
-            if (persistentPlayer.currentPlayer.equals(targetPlayer)) {
+            if (persistentPlayer.currentPlayer.ip().equals(targetPlayer.ip())) {
                 return persistentPlayer;
             }
         }
