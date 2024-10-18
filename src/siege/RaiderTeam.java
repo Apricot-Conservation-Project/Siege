@@ -11,6 +11,9 @@ public class RaiderTeam {
     public List<PersistentPlayer> players;
     public boolean open;
 
+    public List<PersistentPlayer> joinRequests;
+    public List<PersistentPlayer> invitations;
+
     public RaiderTeam() {
         id = 0;
         boolean collision = true;
@@ -100,9 +103,7 @@ public class RaiderTeam {
             }
         }
 
-        /**
-         * Sends a help message listing the team commands
-         */
+        // Sends a help message listing the team commands
         private static void teamsHelp(Player executor) {
             String output;
             if (SiegePlugin.gamedata.gameStarted()) {
@@ -115,7 +116,7 @@ public class RaiderTeam {
                         "\n[accent]Currently in team setup phase." +
                         "\n[orange]team list[white]: List all current Raider teams." +
                         "\n[orange]team invite [yellow]<player name/ID>[white]: Invite a player to your team, or accept a join request." +
-                        "\n[orange]team join [yellow]<team ID>[white]: Request to join a team, or accept a team's invitation." +
+                        "\n[orange]team join [yellow]<team/player name/ID>[white]: Request to join a team, or accept a team's invitation." +
                         "\n[orange]team quit[white]: Quit your team and return to the Citadel team. You may attempt to join a new team afterward." +
                         "\n[orange]team create[white]: Create a new team." +
                         "\n[orange]team open[white]: Allow any player to join your team without approval." +
@@ -126,9 +127,7 @@ public class RaiderTeam {
             executor.sendMessage(output);
         }
 
-        /**
-         * Lists all current teams
-         */
+        // Lists all current teams
         private static void teamsList(Player executor) {
             if (SiegePlugin.gamedata.raiderTeams.isEmpty()) {
                 executor.sendMessage("[accent]There are currently no Raider teams.");
@@ -150,24 +149,86 @@ public class RaiderTeam {
             executor.sendMessage("");
         }
 
-        /**
-         * Invites a player or accepts a join request to the executor's team
-         */
-        private static void teamsInvite(Player executor, String targetPlayer) {
-            // Find player with associated name
-            // Invite invitee to player's team
-            // TODO
+        // Invites a player or accepts a join request to the executor's team
+        private static void teamsInvite(Player executor, String targetPlayerString) {
+            RaiderTeam team = RaiderTeam.getTeam(PersistentPlayer.fromPlayer(executor));
+
+            if (team == null) {
+                executor.sendMessage("[red]You are not currently in a team.");
+                return;
+            }
+
+            PersistentPlayer targetPlayer = PersistentPlayer.fromString(targetPlayerString, executor);
+
+            if (targetPlayer == null) {
+                // Error messages have already been sent.
+                return;
+            }
+
+            if (team.players.contains(targetPlayer)) {
+                executor.sendMessage("[accent]You are already in the same team.");
+                return;
+            }
+
+            if (team.invitations.contains(targetPlayer)) {
+                executor.sendMessage(targetPlayer.currentPlayer.name + "[accent] has already been invited.");
+                return;
+            }
+
+            if (team.joinRequests.contains(targetPlayer)) {
+                team.joinRequests.remove(targetPlayer);
+                team.players.add(targetPlayer);
+                executor.sendMessage(targetPlayer.currentPlayer.name + "[accent] was added to the team.");
+                return;
+            }
+
+            team.invitations.add(targetPlayer);
         }
 
-        /**
-         * Requests to join, or accepts an invitation to a team
-         */
-        private static void teamsJoin(Player executor, String teamID) {
-            // Find team with id
-            // Place request to join team
-            // TODO
+        // Requests to join, or accepts an invitation to a team
+        // Players who are already in a team should be able to request to join (switch) as well, so long as they are in the team setup phase.
+        private static void teamsJoin(Player executor, String targetString) {
+            int id = -1;
+            try {
+                id = Integer.parseInt(targetString);
+            } catch (NumberFormatException ignored) {}
+
+            RaiderTeam team = null;
+            for (RaiderTeam t : SiegePlugin.gamedata.raiderTeams) {
+                if (t.id == id) {
+                    team = t;
+                }
+            }
+
+            if (team == null) {
+                PersistentPlayer targetPlayer = PersistentPlayer.fromString(targetString, executor);
+                if (targetPlayer == null) {
+                    executor.sendMessage("[red]No matching teams found.");
+                    return;
+                }
+                team = RaiderTeam.getTeam(targetPlayer);
+                if (team == null) {
+                    executor.sendMessage("[red]Player [accent]" + targetPlayer.currentPlayer.name + "[red] is not in a team.");
+                    return;
+                }
+            }
+
+            if (team.joinRequests.contains(executor)) {
+                executor.sendMessage("[accent]You have already requested to join team [blue]" + team.id + "[accent].");
+                return;
+            }
+
+            if (team.invitations.contains(executor)) {
+                team.invitations.remove(executor);
+                team.players.add(PersistentPlayer.fromPlayer(executor));
+                executor.sendMessage("[accent]Joined team [blue]" + team.id + "[accent].");
+                return;
+            }
+
+            team.joinRequests.add(PersistentPlayer.fromPlayer(executor));
         }
 
+        // Leaves the current team
         private static void teamsQuit(Player executor) {
             PersistentPlayer persistentExecutor = PersistentPlayer.fromPlayer(executor);
             for (RaiderTeam team : SiegePlugin.gamedata.raiderTeams) {
@@ -181,6 +242,7 @@ public class RaiderTeam {
             executor.sendMessage("[accent]You are not currently in a team.");
         }
 
+        // Creates a new team
         private static void teamsCreate(Player executor) {
             if (getTeam(PersistentPlayer.fromPlayer(executor)) != null) {
                 executor.sendMessage("[red]You are already in a team!");
@@ -194,6 +256,7 @@ public class RaiderTeam {
             SiegePlugin.gamedata.raiderTeams.add(newTeam);
         }
 
+        // Opens the current team to unrestricted joining
         private static void teamsOpen(Player executor) {
             RaiderTeam team = getTeam(PersistentPlayer.fromPlayer(executor));
 
@@ -206,6 +269,7 @@ public class RaiderTeam {
             team.open = true;
         }
 
+        // Closes the current team from unrestricted joining
         private static void teamsClose(Player executor) {
             RaiderTeam team = getTeam(PersistentPlayer.fromPlayer(executor));
 
@@ -218,6 +282,7 @@ public class RaiderTeam {
             team.open = false;
         }
 
+        // Starts a vote to kick a player from the team.
         private static void teamsKick(Player executor, String targetPlayer) {
             // Start a vote to kick the target player from your team
             // TODO
