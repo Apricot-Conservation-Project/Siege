@@ -183,13 +183,28 @@ public class RaiderTeam {
                 return;
             }
 
+            // Invitation is immediately accepted
             if (team.joinRequests.contains(targetPlayer)) {
+                if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
+                    executor.sendMessage("[accent]Your invitation would be accepted, however, your team is already full. In order for another player to join, one of yours must leave.");
+                    return;
+                }
                 team.joinRequests.remove(targetPlayer);
                 team.players.add(targetPlayer);
-                executor.sendMessage(targetPlayer.currentPlayer.name + "[accent] was added to the team.");
+                for (PersistentPlayer player : team.players) {
+                    player.currentPlayer.sendMessage(executor.name + " [accent]added " + targetPlayer.currentPlayer.name + " [accent]to the team.");
+                }
+                targetPlayer.currentPlayer.sendMessage("[accent]You have been added to team [blue]" + team.id + "[accent].");
                 return;
             }
 
+            // Invitation is sent, to be accepted or ignored by the recipient
+            if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
+                executor.sendMessage("[accent]Your invitation has been sent, however, your team is already full. In order for another player to join, one of yours must leave.");
+            }
+            for (PersistentPlayer player : team.players) {
+                player.currentPlayer.sendMessage(executor.name + " [accent]invited " + targetPlayer.currentPlayer.name + " [accent]to the team.");
+            }
             team.invitations.add(targetPlayer);
         }
 
@@ -208,6 +223,8 @@ public class RaiderTeam {
                 }
             }
 
+            PersistentPlayer persistentExecutor = PersistentPlayer.fromPlayer(executor);
+
             if (team == null) {
                 PersistentPlayer targetPlayer = PersistentPlayer.fromString(targetString, executor);
                 if (targetPlayer == null) {
@@ -221,19 +238,34 @@ public class RaiderTeam {
                 }
             }
 
-            if (team.joinRequests.contains(executor)) {
+            if (team.joinRequests.contains(persistentExecutor)) {
                 executor.sendMessage("[accent]You have already requested to join team [blue]" + team.id + "[accent].");
                 return;
             }
 
-            if (team.invitations.contains(executor)) {
-                team.invitations.remove(executor);
-                team.players.add(PersistentPlayer.fromPlayer(executor));
+            // Join request is instantly accepted
+            if (team.open || team.invitations.contains(persistentExecutor)) {
+                if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
+                    executor.sendMessage("[accent]Your join request would be accepted, however, team [blue]" + team.id + " [accent] is already full. You might want to consider creating or joining another team.");
+                    return;
+                }
+                team.invitations.remove(persistentExecutor);
+                team.players.add(persistentExecutor);
+                for (PersistentPlayer player : team.players) {
+                    player.currentPlayer.sendMessage(executor.name + " [accent] has joined the team.");
+                }
                 executor.sendMessage("[accent]Joined team [blue]" + team.id + "[accent].");
                 return;
             }
 
-            team.joinRequests.add(PersistentPlayer.fromPlayer(executor));
+            // Join request is sent to be accepted or ignored by the recipient
+            if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
+                executor.sendMessage("[accent]Your join request was placed, but keep in mind that the team is already full. If another player leaves, they may accept you, but consider creating or joining another team.");
+            }
+            for (PersistentPlayer player : team.players) {
+                player.currentPlayer.sendMessage(executor.name + " [accent] has requested to join the team.");
+            }
+            team.joinRequests.add(persistentExecutor);
         }
 
         // Leaves the current team
