@@ -117,6 +117,7 @@ public class SiegePlugin extends Plugin {
     @Override
     public void registerClientCommands(CommandHandler handler) {
         RaiderTeam.Commands.registerCommands(handler);
+        handler.<Player>register("siege", "Explain the Siege gamemode", (args, player) -> siegeHelp(player));
     }
 
     @Override
@@ -140,6 +141,11 @@ public class SiegePlugin extends Plugin {
             Log.info("Game ended.");
             // TODO end the game
         });*/
+    }
+
+    private static void siegeHelp(Player executor) {
+        executor.sendMessage("Not implemented");
+        // TODO write a brief text to explain siege
     }
 
 
