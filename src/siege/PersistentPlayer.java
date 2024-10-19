@@ -73,7 +73,7 @@ public class PersistentPlayer {
         }
 
         if (executor != null) {
-            executor.sendMessage("[red] Player [accent]\"" + s.toLowerCase() + "\"[red] not found.");
+            executor.sendMessage("[red]Player \"[accent]" + s.toLowerCase() + "[red]\" not found.");
         }
         return null;
     }
