@@ -3,6 +3,7 @@ package siege;
 import arc.*;
 import arc.util.*;
 import mindustry.game.EventType;
+import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.mod.*;
 
@@ -31,6 +32,7 @@ public class SiegePlugin extends Plugin {
 
         Events.on(EventType.PlayerJoin.class, event -> {
             PersistentPlayer.fromPlayer(event.player).online = true;
+            joinMessage(event.player);
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
@@ -59,6 +61,19 @@ public class SiegePlugin extends Plugin {
         // TODO: Change map
     }
 
+    private static void joinMessage(Player player) {
+        if (RaiderTeam.getTeam(PersistentPlayer.fromPlayer(player)) != null) {
+            return;
+        }
+        if (Gamedata.gameStarted()) {
+            SiegePlugin.announce("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. You have joined after the beginning of the game, meaning you are on the Citadel team. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
+        } else if (!Gamedata.teamSetupPhase()) {
+            SiegePlugin.announce("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. You have joined after teams were determined, meaning you are on the Citadel team. The game will begin in " + (-Gamedata.elapsedTimeSeconds()) + " seconds. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
+        } else {
+            SiegePlugin.announce("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. Team setup is currently ongoing, if you would like to create or join a team, run /team. Team setup will end in " + (-Gamedata.elapsedTimeSeconds() - Constants.CORE_PLACEMENT_TIME_SECONDS) + " seconds. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
+        }
+    }
+
     // Manages constant processes that happen always
     private void alwaysUpdate() {
         checkTeams();
@@ -66,13 +81,35 @@ public class SiegePlugin extends Plugin {
 
     // Manages constant processes after setup
     private void gameUpdate() {
-        //
+        if (!Setup.gameBegun) {
+            Setup.beginGame();
+        }
     }
 
     private void checkTeams() {
         Gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
 
-        if (gamedata.gameStarted() && gamedata.raiderTeams.isEmpty()) {
+        // Setup handles in case of team setup phase
+        if (!Gamedata.teamSetupPhase()) {
+            for (Player player : Groups.player) {
+                PersistentPlayer persistentPlayer = PersistentPlayer.fromPlayer(player);
+                RaiderTeam team = RaiderTeam.getTeam(persistentPlayer);
+                if (team != null) {
+                    if (team.mindustryTeam == null) {
+                        continue;
+                    }
+                    if (player.team().id != team.mindustryTeam.id) {
+                        player.team(team.mindustryTeam);
+                    }
+                } else if (Gamedata.gameStarted()) {
+                    player.team(Team.green);
+                } else {
+                    player.team(Team.blue);
+                }
+            }
+        }
+
+        if (Gamedata.gameStarted() && Gamedata.raiderTeams.isEmpty()) {
             endGame(0);
         }
     }

@@ -11,6 +11,10 @@ public class RaiderTeam {
     public List<PersistentPlayer> players;
     public boolean open;
 
+    // Should have no value until team setup ends
+    public Team mindustryTeam;
+
+    // Should be inaccessible after setup concludes.
     public List<PersistentPlayer> joinRequests;
     public List<PersistentPlayer> invitations;
 
@@ -51,6 +55,10 @@ public class RaiderTeam {
 
         return null;
     }
+
+
+
+
 
     public static class Commands {
         /**

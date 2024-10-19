@@ -10,7 +10,7 @@ public class PersistentPlayer {
     public boolean online;
     public long lastSeen;
     public Player currentPlayer;
-    private static List<PersistentPlayer> players = new ArrayList<>();
+    public static List<PersistentPlayer> players = new ArrayList<>();
 
     /**
      * Returns a player's PersistentPlayer if one has already been made, otherwise creates a new instance for the given player.
