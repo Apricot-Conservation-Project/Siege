@@ -98,7 +98,7 @@ public class RaiderTeam {
                     case "list":     teamsList(executor); return;
                     case "quit":     teamsQuit(executor); return;
                     case "kick":     teamsKick(executor, args[1]); return;
-                    default: executor.sendMessage("[red]This subcommand is no longer allowed, as the game has begun. Check /team list for available team commands.");
+                    default: executor.sendMessage("[red]This subcommand is no longer allowed, as the game has begun. Check /team help for available team commands.");
                 }
             }
         }
