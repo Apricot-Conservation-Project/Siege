@@ -62,7 +62,6 @@ public class SiegePlugin extends Plugin {
     // Manages constant processes that happen always
     private void alwaysUpdate() {
         checkTeams();
-        //PersistentPlayer.updatePlayers();
     }
 
     // Manages constant processes after setup
