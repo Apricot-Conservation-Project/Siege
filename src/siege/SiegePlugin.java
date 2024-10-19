@@ -37,6 +37,7 @@ public class SiegePlugin extends Plugin {
 
         Events.on(EventType.PlayerLeave.class, event -> {
             PersistentPlayer.fromPlayer(event.player).online = false;
+            PersistentPlayer.fromPlayer(event.player).lastSeen = System.currentTimeMillis();
         });
     }
 
