@@ -43,25 +43,37 @@ public class SiegePlugin extends Plugin {
      * @param winner The game's winner. 0 if the Citadel wins, otherwise is the ID of the winning team. -1 if the game is ended without a winner.
      */
     public void endGame(int winner) {
-        /*switch (winner) {
-            // ???
-        }*/
+        if (winner == 0) {
+            announce("[accent] The [green]Citadel [accent]has won the game!");
+        } else if (winner == -1) {
+            announce("[accent]Game ended without a winner.");
+        } else {
+            for (RaiderTeam team : gamedata.raiderTeams) {
+                if (team.id == winner) {
+                    announce("[accent]Team [blue]" + team.id + " [accent]has won the game!");
+                    break;
+                }
+            }
+        }
+
+        // TODO: Change map
     }
 
     // Manages constant processes that happen always
     private void alwaysUpdate() {
+        checkTeams();
         //PersistentPlayer.updatePlayers();
     }
 
     // Manages constant processes after setup
     private void gameUpdate() {
-        checkTeams();
+        //
     }
 
     private void checkTeams() {
         gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
 
-        if (gamedata.raiderTeams.isEmpty()) {
+        if (gamedata.gameStarted() && gamedata.raiderTeams.isEmpty()) {
             endGame(0);
         }
     }
