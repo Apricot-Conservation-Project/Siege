@@ -20,7 +20,7 @@ public class RaiderTeam {
         while (collision) {
             id ++;
             collision = false;
-            for (RaiderTeam team : SiegePlugin.gamedata.raiderTeams) {
+            for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.id == id) {
                     collision = true;
                     break;
@@ -43,7 +43,7 @@ public class RaiderTeam {
      * @return The player's team if they are in one, otherwise null
      */
     public static RaiderTeam getTeam(PersistentPlayer player) {
-        for (RaiderTeam team : SiegePlugin.gamedata.raiderTeams) {
+        for (RaiderTeam team : Gamedata.raiderTeams) {
             if (team.players.contains(player)) {
                 return team;
             }
@@ -79,7 +79,7 @@ public class RaiderTeam {
                 return;
             }
 
-            if (SiegePlugin.gamedata.teamSetupPhase()) {
+            if (Gamedata.teamSetupPhase()) {
                 switch (args[0]) {
                     case "help":     teamsHelp(executor); return;
                     case "list":     teamsList(executor); return;
@@ -106,7 +106,7 @@ public class RaiderTeam {
         // Sends a help message listing the team commands
         private static void teamsHelp(Player executor) {
             String output;
-            if (SiegePlugin.gamedata.gameStarted()) {
+            if (Gamedata.gameStarted()) {
                 output =
                         "\n[orange]team list[white]: List all current Raider teams." +
                         "\n[orange]team quit[white]: Quit your team and return to the Citadel team. You may attempt to join a new team afterward." +
@@ -129,12 +129,12 @@ public class RaiderTeam {
 
         // Lists all current teams
         private static void teamsList(Player executor) {
-            if (SiegePlugin.gamedata.raiderTeams.isEmpty()) {
+            if (Gamedata.raiderTeams.isEmpty()) {
                 executor.sendMessage("[accent]There are currently no Raider teams.");
                 return;
             }
 
-            SiegePlugin.gamedata.raiderTeams.forEach(team -> {
+            Gamedata.raiderTeams.forEach(team -> {
                 executor.sendMessage("\n[accent]Team ID: [blue]" + team.id);
 
                 team.players.forEach(player -> {
@@ -194,7 +194,7 @@ public class RaiderTeam {
             } catch (NumberFormatException ignored) {}
 
             RaiderTeam team = null;
-            for (RaiderTeam t : SiegePlugin.gamedata.raiderTeams) {
+            for (RaiderTeam t : Gamedata.raiderTeams) {
                 if (t.id == id) {
                     team = t;
                 }
@@ -231,7 +231,7 @@ public class RaiderTeam {
         // Leaves the current team
         private static void teamsQuit(Player executor) {
             PersistentPlayer persistentExecutor = PersistentPlayer.fromPlayer(executor);
-            for (RaiderTeam team : SiegePlugin.gamedata.raiderTeams) {
+            for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.players.contains(persistentExecutor)) {
                     team.players.remove(persistentExecutor);
                     executor.sendMessage("[accent]Left team [blue]" + team.id);
@@ -253,7 +253,7 @@ public class RaiderTeam {
 
             executor.sendMessage("[accent]Team created. ID: [blue]" + newTeam.id);
 
-            SiegePlugin.gamedata.raiderTeams.add(newTeam);
+            Gamedata.raiderTeams.add(newTeam);
         }
 
         // Opens the current team to unrestricted joining

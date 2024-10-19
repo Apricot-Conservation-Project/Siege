@@ -7,18 +7,18 @@ import mindustry.gen.*;
 import mindustry.mod.*;
 
 public class SiegePlugin extends Plugin {
-    public static Gamedata gamedata;
 
     @Override
     public void init() {
         System.out.println("SiegePlugin loaded");
 
-        gamedata = new Gamedata();
+        Gamedata.reset();
+        Setup.reset();
 
         Events.run(EventType.Trigger.update, () -> {
             alwaysUpdate();
 
-            if (!gamedata.gameStarted()) {
+            if (!Gamedata.gameStarted()) {
                 Setup.update();
             } else {
                 gameUpdate();
@@ -48,7 +48,7 @@ public class SiegePlugin extends Plugin {
         } else if (winner == -1) {
             announce("[accent]Game ended without a winner.");
         } else {
-            for (RaiderTeam team : gamedata.raiderTeams) {
+            for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.id == winner) {
                     announce("[accent]Team [blue]" + team.id + " [accent]has won the game!");
                     break;
@@ -70,7 +70,7 @@ public class SiegePlugin extends Plugin {
     }
 
     private void checkTeams() {
-        gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
+        Gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
 
         if (gamedata.gameStarted() && gamedata.raiderTeams.isEmpty()) {
             endGame(0);
