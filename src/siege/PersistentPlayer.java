@@ -63,7 +63,7 @@ public class PersistentPlayer {
             if (Objects.equals(persistentPlayer.currentPlayer.plainName().toLowerCase(), s.toLowerCase())) {
                 if (output != null) {
                     if (executor != null) {
-                        executor.sendMessage("[red] Multiple players matching given name \"" + s.toLowerCase() + "\"[accent]. Consider using the player's ID instead.");
+                        executor.sendMessage("[red]Multiple players matching given name \"[accent]" + s.toLowerCase() + "[red]\". Consider using the player's ID instead.");
                     }
                     return null;
                 }
