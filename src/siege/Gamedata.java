@@ -7,12 +7,14 @@ public final class Gamedata {
     public static List<RaiderTeam> deadRaiderTeams;
     public static List<RaiderTeam> raiderTeams;
     public static long startTime;
+    public static boolean gameOver;
     //public int mapIndex;
 
     public static void reset() {
         startTime = System.currentTimeMillis() + 1000 * Constants.SETUP_TIME_SECONDS;
         raiderTeams = new ArrayList<>();
         deadRaiderTeams = new ArrayList<>();
+        gameOver = false;
     }
 
     /**

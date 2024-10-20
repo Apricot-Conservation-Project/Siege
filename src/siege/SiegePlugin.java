@@ -21,7 +21,7 @@ public class SiegePlugin extends Plugin {
 
             if (!Gamedata.gameStarted()) {
                 Setup.update();
-            } else {
+            } else if (!Gamedata.gameOver) {
                 gameUpdate();
             }
         });
@@ -46,8 +46,10 @@ public class SiegePlugin extends Plugin {
      * @param winner The game's winner. 0 if the Citadel wins, otherwise is the ID of the winning team. -1 if the game is ended without a winner.
      */
     public void endGame(int winner) {
+        Gamedata.gameOver = true;
+
         if (winner == 0) {
-            announce("[accent] The [green]Citadel[] has won the game!");
+            announce("[accent]The [green]Citadel[] has won the game!");
         } else if (winner == -1) {
             announce("[accent]Game ended without a winner.");
         } else {
@@ -59,6 +61,7 @@ public class SiegePlugin extends Plugin {
             }
         }
 
+        announce("Map change and game reset not implemented.");
         // TODO: Change map
     }
 
@@ -77,10 +80,12 @@ public class SiegePlugin extends Plugin {
 
     // Manages constant processes that happen always
     private void alwaysUpdate() {
-        checkTeams();
+        if (!Gamedata.gameOver) {
+            checkTeams();
+        }
     }
 
-    // Manages constant processes after setup
+    // Manages constant processes during the course of a game (does not run during setup or during game over)
     private void gameUpdate() {
         if (!Setup.gameBegun) {
             Setup.beginGame();
