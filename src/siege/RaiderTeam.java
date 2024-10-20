@@ -9,6 +9,7 @@ import java.util.List;
 
 public class RaiderTeam {
     public int id;
+    public String stringID;
     public List<PersistentPlayer> players;
     public boolean open;
 
@@ -35,6 +36,7 @@ public class RaiderTeam {
 
         players = new ArrayList<>();
         open = false;
+        stringID = "[blue]" + id + "[]";
     }
 
     public RaiderTeam(Player initialPlayer) {
@@ -144,12 +146,12 @@ public class RaiderTeam {
             }
 
             Gamedata.raiderTeams.forEach(team -> {
-                executor.sendMessage("\n[accent]Team ID: [blue]" + team.id);
+                executor.sendMessage("\n[accent]Team ID: " + team.stringID);
 
                 team.players.forEach(player -> {
                     String message = "      [accent]Player ID: [blue]" + player.currentPlayer.id + ":[white] " + player.currentPlayer.name;
                     if (!player.online) {
-                        message += " [white]([red]offline[white])";
+                        message += " [white]([red]offline[])";
                     }
                     executor.sendMessage(message);
                 });
@@ -195,7 +197,7 @@ public class RaiderTeam {
                 for (PersistentPlayer player : team.players) {
                     player.currentPlayer.sendMessage(executor.name + " [accent]added " + targetPlayer.currentPlayer.name + " [accent]to the team.");
                 }
-                targetPlayer.currentPlayer.sendMessage("[accent]You have been added to team [blue]" + team.id + "[accent].");
+                targetPlayer.currentPlayer.sendMessage("[accent]You have been added to team " + team.stringID + ".");
                 return;
             }
 
@@ -240,14 +242,14 @@ public class RaiderTeam {
             }
 
             if (team.joinRequests.contains(persistentExecutor)) {
-                executor.sendMessage("[accent]You have already requested to join team [blue]" + team.id + "[accent].");
+                executor.sendMessage("[accent]You have already requested to join team " + team.stringID + ".");
                 return;
             }
 
             // Join request is instantly accepted
             if (team.open || team.invitations.contains(persistentExecutor)) {
                 if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
-                    executor.sendMessage("[accent]Your join request would be accepted, however, team [blue]" + team.id + " [accent] is already full. You might want to consider creating or joining another team.");
+                    executor.sendMessage("[accent]Your join request would be accepted, however, team " + team.stringID + " is already full. You might want to consider creating or joining another team.");
                     return;
                 }
                 team.invitations.remove(persistentExecutor);
@@ -255,7 +257,7 @@ public class RaiderTeam {
                 for (PersistentPlayer player : team.players) {
                     player.currentPlayer.sendMessage(executor.name + " [accent] has joined the team.");
                 }
-                executor.sendMessage("[accent]Joined team [blue]" + team.id + "[accent].");
+                executor.sendMessage("[accent]Joined team " + team.stringID + ".");
                 return;
             }
 
@@ -275,7 +277,7 @@ public class RaiderTeam {
             for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.players.contains(persistentExecutor)) {
                     team.players.remove(persistentExecutor);
-                    executor.sendMessage("[accent]Left team [blue]" + team.id);
+                    executor.sendMessage("[accent]Left team " + team.stringID);
                     return;
                 }
             }
@@ -292,7 +294,7 @@ public class RaiderTeam {
 
             RaiderTeam newTeam = new RaiderTeam(executor);
 
-            executor.sendMessage("[accent]Team created. ID: [blue]" + newTeam.id);
+            executor.sendMessage("[accent]Team created. ID: " + newTeam.stringID);
 
             Gamedata.raiderTeams.add(newTeam);
         }
@@ -306,7 +308,7 @@ public class RaiderTeam {
                 return;
             }
 
-            SiegePlugin.announce("Team " + team.id + " opened. Anyone can now join this team.");
+            SiegePlugin.announce("Team " + team.stringID + " opened. Anyone can now join this team.");
             team.open = true;
         }
 
@@ -319,7 +321,7 @@ public class RaiderTeam {
                 return;
             }
 
-            SiegePlugin.announce("Team " + team.id + " closed. Joins now possible only by request.");
+            SiegePlugin.announce("Team " + team.stringID + " closed. Joins now possible only by request.");
             team.open = false;
         }
 

@@ -68,6 +68,7 @@ public final class Setup {
 
         for (RaiderTeam team : Gamedata.raiderTeams) {
             team.mindustryTeam = Team.all[team.id + 7];
+            team.stringID = "[#" + team.mindustryTeam.color.toString().substring(0, 6) + "]" + team.id + "[]";
         }
     }
 

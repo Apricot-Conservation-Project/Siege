@@ -47,13 +47,13 @@ public class SiegePlugin extends Plugin {
      */
     public void endGame(int winner) {
         if (winner == 0) {
-            announce("[accent] The [green]Citadel [accent]has won the game!");
+            announce("[accent] The [green]Citadel[] has won the game!");
         } else if (winner == -1) {
             announce("[accent]Game ended without a winner.");
         } else {
             for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.id == winner) {
-                    announce("[accent]Team [blue]" + team.id + " [accent]has won the game!");
+                    announce("[accent]Team " + team.stringID + " has won the game!");
                     break;
                 }
             }
