@@ -10,12 +10,11 @@ public final class Setup {
     // Measured in elapsed seconds as returned by Gamedata
     private static int nextTimeReminder = 0;
     private static boolean changedToCorePlacement = false;
-    public static boolean gameBegun = false;
 
     public static void reset() {
         nextTimeReminder = 0;
         changedToCorePlacement = false;
-        gameBegun = false;
+        Gamedata.gameStarted = false;
         startSetup();
     }
 
@@ -24,6 +23,10 @@ public final class Setup {
      */
     public static void update() {
         updateRespawn();
+
+        if (Gamedata.gameStartTime()) {
+            Setup.beginGame();
+        }
 
         if (!changedToCorePlacement && !Gamedata.teamSetupPhase()) {
             changePhaseToCorePlacement();
@@ -72,8 +75,11 @@ public final class Setup {
         }
     }
 
+    /**
+     * Performs Setup's last tasks, ending core placement and starting the game. Setup should not be interacted with past this point.
+     */
     public static void beginGame() {
-        gameBegun = true;
+        Gamedata.gameStarted = true;
 
         Team.green.items().add(Constants.CITADEL_LOADOUT);
         for (RaiderTeam team : Gamedata.raiderTeams) {

@@ -19,7 +19,7 @@ public class SiegePlugin extends Plugin {
         Events.run(EventType.Trigger.update, () -> {
             alwaysUpdate();
 
-            if (!Gamedata.gameStarted()) {
+            if (!Gamedata.gameStarted) {
                 Setup.update();
             } else if (!Gamedata.gameOver) {
                 gameUpdate();
@@ -69,7 +69,7 @@ public class SiegePlugin extends Plugin {
         if (RaiderTeam.getTeam(PersistentPlayer.fromPlayer(player)) != null) {
             return;
         }
-        if (Gamedata.gameStarted()) {
+        if (Gamedata.gameStarted) {
             SiegePlugin.announce("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. You have joined after the beginning of the game, meaning you are on the Citadel team. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
         } else if (!Gamedata.teamSetupPhase()) {
             SiegePlugin.announce("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. You have joined after teams were determined, meaning you are on the Citadel team. The game will begin in " + (-Gamedata.elapsedTimeSeconds()) + " seconds. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
@@ -87,14 +87,13 @@ public class SiegePlugin extends Plugin {
 
     // Manages constant processes during the course of a game (does not run during setup or during game over)
     private void gameUpdate() {
-        if (!Setup.gameBegun) {
-            Setup.beginGame();
-        }
+        //
     }
 
     private void checkTeams() {
         Gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
 
+        // Ensure players are in the correct team
         // Setup handles in case of team setup phase
         if (!Gamedata.teamSetupPhase()) {
             for (Player player : Groups.player) {
@@ -107,7 +106,7 @@ public class SiegePlugin extends Plugin {
                     if (player.team().id != team.mindustryTeam.id) {
                         player.team(team.mindustryTeam);
                     }
-                } else if (Gamedata.gameStarted()) {
+                } else if (Gamedata.gameStarted) {
                     player.team(Team.green);
                 } else {
                     player.team(Team.blue);
@@ -115,7 +114,7 @@ public class SiegePlugin extends Plugin {
             }
         }
 
-        if (Gamedata.gameStarted()) {
+        if (Gamedata.gameStarted) {
             // Gamedata.raiderTeams may be modified inside this loop.
             RaiderTeam[] teams = Gamedata.raiderTeams.toArray(new RaiderTeam[0]);
             for (RaiderTeam team : teams) {

@@ -159,7 +159,7 @@ public class RaiderTeam {
         // Sends a help message listing the team commands
         private static void teamsHelp(Player executor) {
             String output;
-            if (Gamedata.gameStarted()) {
+            if (Gamedata.gameStarted) {
                 output =
                         "\n[orange]team list[white]: List all current Raider teams." +
                         "\n[orange]team quit[white]: Quit your team and return to the Citadel team. You may attempt to join a new team afterward." +

@@ -7,6 +7,7 @@ public final class Gamedata {
     public static List<RaiderTeam> deadRaiderTeams;
     public static List<RaiderTeam> raiderTeams;
     public static long startTime;
+    public static boolean gameStarted; // Owned by Setup
     public static boolean gameOver;
     //public int mapIndex;
 
@@ -18,9 +19,9 @@ public final class Gamedata {
     }
 
     /**
-     * @return Whether the game has started yet (setup has concluded)
+     * @return Whether the game should have started yet. Prefer its variable form for most cases, as this is based only on time and could desync.
      */
-    public static boolean gameStarted() {
+    public static boolean gameStartTime() {
         return elapsedTimeSeconds() >= 0;
     }
 
