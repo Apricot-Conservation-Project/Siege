@@ -134,6 +134,11 @@ public class SiegePlugin extends Plugin {
     public void registerClientCommands(CommandHandler handler) {
         RaiderTeam.Commands.registerCommands(handler);
         handler.<Player>register("siege", "Explain the Siege gamemode", (args, player) -> siegeHelp(player));
+        handler.<Player>register("reset", "debug reset game", (args, player) -> {
+            System.out.println("SiegePlugin reset");
+            Gamedata.reset();
+            Setup.reset();
+        });
     }
 
     @Override
