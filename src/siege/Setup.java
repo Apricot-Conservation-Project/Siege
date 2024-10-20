@@ -75,6 +75,11 @@ public final class Setup {
     public static void beginGame() {
         gameBegun = true;
 
+        Team.green.items().add(Constants.CITADEL_LOADOUT);
+        for (RaiderTeam team : Gamedata.raiderTeams) {
+            team.mindustryTeam.items().add(Constants.RAIDER_LOADOUT);
+        }
+
         for (RaiderTeam team : Gamedata.raiderTeams) {
             // TODO find the geometric median of team's players and put a core there
         }
