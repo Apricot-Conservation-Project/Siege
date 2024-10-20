@@ -110,8 +110,18 @@ public class SiegePlugin extends Plugin {
             }
         }
 
-        if (Gamedata.gameStarted() && Gamedata.raiderTeams.isEmpty()) {
-            endGame(0);
+        if (Gamedata.gameStarted()) {
+            // Gamedata.raiderTeams may be modified inside this loop.
+            RaiderTeam[] teams = Gamedata.raiderTeams.toArray(new RaiderTeam[0]);
+            for (RaiderTeam team : teams) {
+                if (team.mindustryTeam.cores().size == 0) {
+                    team.destroy();
+                }
+            }
+
+            if (Gamedata.raiderTeams.isEmpty()) {
+                endGame(0);
+            }
         }
     }
 

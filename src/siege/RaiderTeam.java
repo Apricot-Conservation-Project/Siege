@@ -1,11 +1,19 @@
 package siege;
 
+import arc.math.Mathf;
 import arc.util.CommandHandler;
+import arc.util.Time;
 import mindustry.game.Team;
+import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import mindustry.gen.Unit;
+import mindustry.world.Tile;
+import mindustry.world.blocks.storage.CoreBlock;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static mindustry.Vars.world;
 
 public class RaiderTeam {
     public int id;
@@ -57,6 +65,40 @@ public class RaiderTeam {
         }
 
         return null;
+    }
+
+    public void destroy() {
+        SiegePlugin.announce("[accent]Team " + stringID + " has been destroyed!");
+
+        Gamedata.deadRaiderTeams.add(this);
+        Gamedata.raiderTeams.remove(this);
+
+        // Kill all the team's units and blocks.
+        for (int x = 0; x < world.width(); x++) {
+            for (int y = 0; y < world.height(); y++) {
+                Tile tile = world.tile(x, y);
+                if (tile.build != null && tile.team() == mindustryTeam) {
+                    Time.run(Mathf.random(60f * 6), tile.build::kill);
+                }
+            }
+        }
+        for (Unit u : Groups.unit) {
+            if (u.team == mindustryTeam) {
+                u.kill();
+            }
+        }
+
+        // Put all players into Citadel team
+        for (PersistentPlayer player : players) {
+            if (player.online) {
+                if (player.currentPlayer.team() != Team.green) {
+                    player.currentPlayer.team(Team.green);
+                }
+                if (player.currentPlayer.dead()) {
+                    CoreBlock.playerSpawn(Team.green.cores().random().tile, player.currentPlayer);
+                }
+            }
+        }
     }
 
 
