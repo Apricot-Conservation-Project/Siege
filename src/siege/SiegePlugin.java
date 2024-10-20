@@ -162,6 +162,7 @@ public class SiegePlugin extends Plugin {
 
 
     public static void announce(String message) {
+        System.out.println("Announced: " + message);
         for (Player player : Groups.player) {
             player.sendMessage(message);
         }
