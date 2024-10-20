@@ -20,9 +20,11 @@ public class PersistentPlayer {
     public static PersistentPlayer fromPlayer(Player targetPlayer) {
         for (PersistentPlayer persistentPlayer : players) {
             if (persistentPlayer.currentPlayer.uuid().equals(targetPlayer.uuid())) {
+                persistentPlayer.currentPlayer = targetPlayer;
                 return persistentPlayer;
             }
             if (persistentPlayer.currentPlayer.ip().equals(targetPlayer.ip())) {
+                persistentPlayer.currentPlayer = targetPlayer;
                 return persistentPlayer;
             }
         }
