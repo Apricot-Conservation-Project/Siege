@@ -61,15 +61,8 @@ public class SiegePlugin extends Plugin {
 
         if (winner == 0) {
             announce("[accent]The [green]Citadel[] has won the game!");
-            // I don't know a better way to end the game.
-            for (CoreBlock.CoreBuild core : Team.green.cores()) {
-                core.tile.setAir();
-            }
         } else if (winner == -1) {
             announce("[accent]Game ended without a winner.");
-            for (CoreBlock.CoreBuild core : Team.green.cores()) {
-                core.tile.setAir();
-            }
         } else {
             for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.id == winner) {
@@ -157,6 +150,20 @@ public class SiegePlugin extends Plugin {
             System.out.println("SiegePlugin reset");
             Gamedata.reset();
             Setup.reset();
+        });
+        handler.<Player>register("wincitadel", "debug force citadel win", (args, player) -> {
+            System.out.println("Citadel win forced");
+            for (RaiderTeam team : Gamedata.raiderTeams) {
+                for (CoreBlock.CoreBuild core : team.mindustryTeam.cores()) {
+                    core.tile.setAir();
+                }
+            }
+        });
+        handler.<Player>register("winraider", "debug force raider win", (args, player) -> {
+            System.out.println("Raider win forced");
+            for (CoreBlock.CoreBuild core : Team.green.cores()) {
+                core.tile.setAir();
+            }
         });
     }
 
