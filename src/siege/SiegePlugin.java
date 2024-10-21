@@ -38,6 +38,12 @@ public class SiegePlugin extends Plugin {
             PersistentPlayer.fromPlayer(event.player).online = false;
             PersistentPlayer.fromPlayer(event.player).lastSeen = System.currentTimeMillis();
         });
+
+        Events.on(EventType.BlockDestroyEvent.class, event -> {
+            if (Constants.CORE_TYPES.contains(event.tile.build.block)) {
+                coreDestroy(event.tile.build);
+            }
+        });
     }
 
     private static void update() {
@@ -50,6 +56,17 @@ public class SiegePlugin extends Plugin {
                 gameUpdate();
             }
         }
+    }
+
+    public static void coreDestroy(Building core) {
+        // Notify team's players about dead core
+        for (Player player : Groups.player) {
+            if (player.team() == core.team) {
+                player.sendMessage("[purple]Core destroyed at " + core.tileX() + ", " + core.tileY() + "!");
+            }
+        }
+
+        Gamedata.reloadCore((CoreBlock.CoreBuild) core);
     }
 
     /**

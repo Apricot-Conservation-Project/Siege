@@ -1,7 +1,6 @@
 package siege;
 
 import arc.math.Mathf;
-import arc.struct.Seq;
 import arc.util.CommandHandler;
 import arc.util.Time;
 import mindustry.game.Team;
@@ -57,8 +56,8 @@ public class RaiderTeam {
      * Get all of this team's cores
      * @return All the cores belonging to the team
      */
-    public Seq<CoreBlock.CoreBuild> getCores() {
-        return mindustryTeam.cores();
+    public CoreBlock.CoreBuild[] getCores() {
+        return mindustryTeam.cores().list().toArray(new CoreBlock.CoreBuild[0]);
     }
 
     /**

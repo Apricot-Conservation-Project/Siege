@@ -133,6 +133,15 @@ public final class Setup {
             state.teams.registerCore((CoreBlock.CoreBuild) tile.build);
         }
 
+        long beginTime = System.currentTimeMillis();
+        CoreBlock.CoreBuild[] cores = Gamedata.getAllCores();
+        for (CoreBlock.CoreBuild core : cores) {
+            Gamedata.reloadCore(core);
+        }
+        long endTime = System.currentTimeMillis();
+        int elapsed = (int) (endTime - beginTime);
+        System.out.println(elapsed + " ms to make deadzone (" + Mathf.round(elapsed / (1000f / 60f), 0.01f) + " ticks at 60TPS)");
+
         SiegePlugin.announce("[sky]Cores have been placed. Raiders and the Citadel can now build and attack. Good luck, and have fun!");
     }
 
