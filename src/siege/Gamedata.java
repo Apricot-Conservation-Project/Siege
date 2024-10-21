@@ -38,4 +38,17 @@ public final class Gamedata {
     public static long elapsedTimeSeconds() {
         return (System.currentTimeMillis() - startTime) / 1000;
     }
+
+    public static void dataDump() {
+        System.out.println("\nGamedata and Setup dump\n");
+        System.out.println("deadRaiderTeams: " + deadRaiderTeams.toString());
+        System.out.println("raiderTeams: " + raiderTeams.toString());
+        System.out.println("startTime: " + startTime);
+        System.out.println("gameStarted: " + gameStarted);
+        System.out.println("gameOver: " + gameOver);
+        System.out.println("elapsedTimeSeconds(): " + elapsedTimeSeconds());
+        System.out.println("--- Setup ---");
+        Setup.dataDump();
+        System.out.println("\n");
+    }
 }

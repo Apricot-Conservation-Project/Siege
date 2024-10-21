@@ -185,4 +185,9 @@ public final class Setup {
         }
         return median;
     }
+
+    public static void dataDump() {
+        System.out.println("nextTimeReminder: " + nextTimeReminder);
+        System.out.println("changedToCorePlacement: " + changedToCorePlacement);
+    }
 }
