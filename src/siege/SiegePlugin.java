@@ -56,7 +56,7 @@ public class SiegePlugin extends Plugin {
      * Ends the current game and loads the next.
      * @param winner The game's winner. 0 if the Citadel wins, otherwise is the ID of the winning team. -1 if the game is ended without a winner.
      */
-    public void endGame(int winner) {
+    public static void endGame(int winner) {
         Gamedata.gameOver = true;
 
         if (winner == 0) {
@@ -97,18 +97,16 @@ public class SiegePlugin extends Plugin {
     }
 
     // Manages constant processes that happen always
-    private void alwaysUpdate() {
-        if (!Gamedata.gameOver) {
-            checkTeams();
-        }
+    private static void alwaysUpdate() {
+        checkTeams();
     }
 
     // Manages constant processes during the course of a game (does not run during setup or during game over)
-    private void gameUpdate() {
+    private static void gameUpdate() {
         //
     }
 
-    private void checkTeams() {
+    private static void checkTeams() {
         Gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
 
         // Ensure players are in the correct team
