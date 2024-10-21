@@ -78,9 +78,13 @@ public class SiegePlugin extends Plugin {
                 }
             }
         }
-
-        announce("Map change and game reset not implemented.");
-        // TODO: Change map
+        Time.run(1.5f * 60f, () -> {
+            //Events.fire(EventType.GameOverEvent.class);
+            // Only way I know how to end the game
+            for (CoreBlock.CoreBuild core : Team.green.cores()) {
+                core.tile.setAir();
+            }
+        });
     }
 
     private static void joinMessage(Player player) {
