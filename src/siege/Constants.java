@@ -1,6 +1,5 @@
 package siege;
 
-import arc.struct.Seq;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
 import mindustry.type.ItemSeq;
