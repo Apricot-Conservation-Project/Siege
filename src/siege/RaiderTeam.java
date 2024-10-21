@@ -1,6 +1,7 @@
 package siege;
 
 import arc.math.Mathf;
+import arc.struct.Seq;
 import arc.util.CommandHandler;
 import arc.util.Time;
 import mindustry.game.Team;
@@ -53,20 +54,16 @@ public class RaiderTeam {
     }
 
     /**
-     * Finds a player's team
-     * @param player Any player
-     * @return The player's team if they are in one, otherwise null
+     * Get all of this team's cores
+     * @return All the cores belonging to the team
      */
-    public static RaiderTeam getTeam(PersistentPlayer player) {
-        for (RaiderTeam team : Gamedata.raiderTeams) {
-            if (team.players.contains(player)) {
-                return team;
-            }
-        }
-
-        return null;
+    public Seq<CoreBlock.CoreBuild> getCores() {
+        return mindustryTeam.cores();
     }
 
+    /**
+     * Destroys this team.
+     */
     public void destroy() {
         SiegePlugin.announce("[accent]Team " + stringID + " has been destroyed!");
 
@@ -99,6 +96,23 @@ public class RaiderTeam {
                 }
             }
         }
+    }
+
+
+
+    /**
+     * Finds a player's team
+     * @param player Any player
+     * @return The player's team if they are in one, otherwise null
+     */
+    public static RaiderTeam getTeam(PersistentPlayer player) {
+        for (RaiderTeam team : Gamedata.raiderTeams) {
+            if (team.players.contains(player)) {
+                return team;
+            }
+        }
+
+        return null;
     }
 
 
