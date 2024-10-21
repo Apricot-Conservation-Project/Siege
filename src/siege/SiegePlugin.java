@@ -17,14 +17,12 @@ public class SiegePlugin extends Plugin {
         Gamedata.reset();
         Setup.reset();
 
-        Events.run(EventType.Trigger.update, () -> {
-            alwaysUpdate();
+        Events.run(EventType.Trigger.update, SiegePlugin::update);
 
-            if (!Gamedata.gameStarted) {
-                Setup.update();
-            } else if (!Gamedata.gameOver) {
-                gameUpdate();
-            }
+        Events.on(EventType.ResetEvent.class, hostEvent -> {
+            System.out.println("ResetEvent Reset");
+            Gamedata.reset();
+            Setup.reset();
         });
 
         Events.on(EventType.PlayerConnect.class, event -> {
@@ -40,6 +38,18 @@ public class SiegePlugin extends Plugin {
             PersistentPlayer.fromPlayer(event.player).online = false;
             PersistentPlayer.fromPlayer(event.player).lastSeen = System.currentTimeMillis();
         });
+    }
+
+    private static void update() {
+        if (!Gamedata.gameOver) {
+            alwaysUpdate();
+
+            if (!Gamedata.gameStarted) {
+                Setup.update();
+            } else if (!Gamedata.gameOver) {
+                gameUpdate();
+            }
+        }
     }
 
     /**
