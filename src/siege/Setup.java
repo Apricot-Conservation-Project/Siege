@@ -116,7 +116,7 @@ public final class Setup {
             List<Point2D.Float> points = new ArrayList<>();
             for (PersistentPlayer player : team.players) {
                 if (player.online) {
-                    // Unknown why, but x/y coordinates are 8* what they should be.
+                    // x, y = 8 * tileX, tileY
                     points.add(new Point2D.Float(player.currentPlayer.x / 8.0f, player.currentPlayer.tileOn().worldy() / 8.0f));
                 }
             }
