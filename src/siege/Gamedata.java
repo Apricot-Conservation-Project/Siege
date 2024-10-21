@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class Gamedata {
-    public static List<RaiderTeam> deadRaiderTeams;
-    public static List<RaiderTeam> raiderTeams;
-    public static long startTime;
-    public static boolean gameStarted; // Owned by Setup
-    public static boolean gameOver;
+    public static List<RaiderTeam> deadRaiderTeams = new ArrayList<>();
+    public static List<RaiderTeam> raiderTeams = new ArrayList<>();
+    public static long startTime = 0;
+    public static boolean gameStarted = false; // Owned by Setup
+    public static boolean gameOver = false;
     //public int mapIndex;
 
     public static void reset() {
