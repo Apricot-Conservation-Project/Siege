@@ -43,6 +43,7 @@ public final class Setup {
 
         if (!changedToCorePlacement && !Gamedata.teamSetupPhase()) {
             changePhaseToCorePlacement();
+            return;
         }
 
         if (Gamedata.elapsedTimeSeconds() >= nextTimeReminder) {
@@ -78,6 +79,14 @@ public final class Setup {
 
     private static void changePhaseToCorePlacement() {
         changedToCorePlacement = true;
+
+        if (Gamedata.raiderTeams.isEmpty()) {
+            SiegePlugin.announce("[sky]Team setup has ended without any teams created.");
+            Gamedata.gameStarted = true;
+            SiegePlugin.endGame(-1);
+            return;
+        }
+
         SiegePlugin.announce("[sky]Team setup has ended. Team configuration commands have been disabled. Teams may now place their Foundation cores. Cores are placed at the geometric median of all team members' positions.");
         SiegePlugin.announce("[accent]You have " + Constants.CORE_PLACEMENT_TIME_SECONDS + " seconds to move to your desired core location.");
         // Set the next time reminder to be the next multiple of 20 seconds away from core placement phase end
