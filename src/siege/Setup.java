@@ -37,6 +37,7 @@ public final class Setup {
         updateRespawn();
 
         if (Gamedata.gameStartTime()) {
+            // Sets a flag which prevents update from being called again
             Setup.beginGame();
         }
 
@@ -44,16 +45,17 @@ public final class Setup {
             changePhaseToCorePlacement();
         }
 
-        if (-Gamedata.elapsedTimeSeconds() > Constants.CORE_PLACEMENT_TIME_SECONDS) {
-            if (Gamedata.elapsedTimeSeconds() >= nextTimeReminder) {
-                SiegePlugin.announce("[accent]" + (-Gamedata.elapsedTimeSeconds() - Constants.CORE_PLACEMENT_TIME_SECONDS) + " Seconds remaining in team setup phase.");
-                nextTimeReminder += 20;
+        if (Gamedata.elapsedTimeSeconds() >= nextTimeReminder) {
+            if (!changedToCorePlacement) {
+                if ( (-Gamedata.elapsedTimeSeconds() - Constants.CORE_PLACEMENT_TIME_SECONDS) > 0 ) {
+                    SiegePlugin.announce("[accent]" + (-Gamedata.elapsedTimeSeconds() - Constants.CORE_PLACEMENT_TIME_SECONDS) + " Seconds remaining in team setup phase.");
+                }
+            } else {
+                if ( (-Gamedata.elapsedTimeSeconds()) > 0 ) {
+                    SiegePlugin.announce("[accent]" + (-Gamedata.elapsedTimeSeconds()) + " Seconds remaining in core placement phase.");
+                }
             }
-        } else {
-            if (Gamedata.elapsedTimeSeconds() >= nextTimeReminder) {
-                SiegePlugin.announce("[accent]" + (-Gamedata.elapsedTimeSeconds()) + " Seconds remaining in core placement phase.");
-                nextTimeReminder += 20;
-            }
+            nextTimeReminder += 20;
         }
     }
 
@@ -77,7 +79,7 @@ public final class Setup {
     private static void changePhaseToCorePlacement() {
         changedToCorePlacement = true;
         SiegePlugin.announce("[sky]Team setup has ended. Team configuration commands have been disabled. Teams may now place their Foundation cores. Cores are placed at the geometric median of all team members' positions.");
-        SiegePlugin.announce("[accent]" + Constants.CORE_PLACEMENT_TIME_SECONDS + " Seconds remaining in core placement phase.");
+        SiegePlugin.announce("[accent]You have " + Constants.CORE_PLACEMENT_TIME_SECONDS + " seconds to move to your desired core location.");
         // Set the next time reminder to be the next multiple of 20 seconds away from core placement phase end
         nextTimeReminder = -20 * (int)( ((double)Constants.CORE_PLACEMENT_TIME_SECONDS - Mathf.FLOAT_ROUNDING_ERROR) / 20.0 );
 
@@ -126,6 +128,7 @@ public final class Setup {
     }
 
     // Finds the point with the least sum distance to all given points, accurate to within the given precision.
+    // Probably does not need to ever be touched again
     private static Point2D.Float geometricMedian(Point2D.Float[] points, float precision) {
         if (points.length == 0) {
             throw new IllegalArgumentException("Point array cannot have length zero.");
