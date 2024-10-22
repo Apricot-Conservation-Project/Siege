@@ -128,7 +128,7 @@ public final class Setup {
             }
             // Build team's core at the geometric median of player positions
             Point2D.Float median = geometricMedian(points.toArray(new Point2D.Float[0]), 0.05f);
-            Tile tile = world.tile(Mathf.round(median.x) - 1, Mathf.round(median.y) - 1); // Subtract 1 because of how foundations 'center' tile are measured
+            Tile tile = world.tile(Mathf.round(median.x - 0.5f), Mathf.round(median.y - 0.5f)); // Subtract 1 because of how foundations 'center' tile are measured
             tile.setNet(Blocks.coreFoundation, team.mindustryTeam, 0);
             state.teams.registerCore((CoreBlock.CoreBuild) tile.build);
         }
