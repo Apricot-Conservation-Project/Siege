@@ -104,12 +104,6 @@ public final class Setup {
     public static void beginGame() {
         Gamedata.gameStarted = true;
 
-        // Give team loadouts
-        Team.green.items().add(Constants.CITADEL_LOADOUT);
-        for (RaiderTeam team : Gamedata.raiderTeams) {
-            team.mindustryTeam.items().add(Constants.RAIDER_LOADOUT);
-        }
-
         // Add raider team cores
         // Teams can be removed here if they have no players.
         RaiderTeam[] teams = Gamedata.raiderTeams.toArray(new RaiderTeam[0]);
@@ -135,6 +129,13 @@ public final class Setup {
             state.teams.registerCore((CoreBlock.CoreBuild) tile.build);
         }
 
+        // Give team loadouts
+        Team.green.items().add(Constants.CITADEL_LOADOUT);
+        for (RaiderTeam team : Gamedata.raiderTeams) {
+            team.mindustryTeam.items().add(Constants.RAIDER_LOADOUT);
+        }
+
+        // Initialize dead zone
         long beginTime = System.currentTimeMillis();
         CoreBlock.CoreBuild[] cores = Gamedata.getAllCores();
         for (CoreBlock.CoreBuild core : cores) {
