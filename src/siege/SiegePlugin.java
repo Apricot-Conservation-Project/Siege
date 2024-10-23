@@ -117,7 +117,18 @@ public class SiegePlugin extends Plugin {
 
     // Manages constant processes during the course of a game (does not run during setup or during game over)
     private static void gameUpdate() {
-        //
+        deadZoneDamage();
+    }
+
+    private static void deadZoneDamage() {
+        for (Unit unit : Groups.unit) {
+            if (Gamedata.getDeadZone(unit.tileOn())  &&  !Constants.DEAD_ZONE_IMMUNE_TYPES.contains(unit.type)) {
+                unit.health -= Constants.DEAD_ZONE_DAMAGE_CONSTANT_TICK + unit.maxHealth * Constants.DEAD_ZONE_DAMAGE_PERCENT_TICK;
+                if (unit.health <= 0.0f && !unit.dead) {
+                    unit.kill();
+                }
+            }
+        }
     }
 
     private static void checkTeams() {

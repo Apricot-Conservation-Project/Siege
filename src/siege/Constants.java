@@ -3,9 +3,13 @@ package siege;
 import arc.struct.Seq;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
+import mindustry.content.UnitTypes;
 import mindustry.type.ItemSeq;
 import mindustry.type.ItemStack;
+import mindustry.type.UnitType;
 import mindustry.world.Block;
+
+import java.util.List;
 
 public class Constants {
     public static final int RAIDER_MAX_PLAYERS = 3;
@@ -18,6 +22,13 @@ public class Constants {
     public static final float FOUNDATION_DEAD_ZONE_RADIUS = 30f;
     public static final float NUCLEUS_DEAD_ZONE_RADIUS = 40f;
     // Fx to indicate keep borders
+    public static final float DEAD_ZONE_DAMAGE_CONSTANT_TICK = 55f / 60f; // Absolute damage every tick
+    public static final float DEAD_ZONE_DAMAGE_PERCENT_TICK = 0.018f / 60f; // Percent of max health every tick
+    public static final List<UnitType> DEAD_ZONE_IMMUNE_TYPES = List.of(new UnitType[] {
+            UnitTypes.alpha,
+            UnitTypes.beta,
+            UnitTypes.gamma,
+    });
 
     public static final int TEAM_SETUP_TIME_SECONDS = 120;
     public static final int CORE_PLACEMENT_TIME_SECONDS = 60;

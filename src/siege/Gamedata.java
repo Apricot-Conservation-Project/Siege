@@ -5,6 +5,7 @@ import arc.math.geom.Point2;
 import mindustry.content.Blocks;
 import mindustry.game.Team;
 import mindustry.world.Block;
+import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 
 import java.util.ArrayList;
@@ -108,8 +109,17 @@ public final class Gamedata {
      * @param tile The world grid tile to check
      * @return Whether the tile is in the dead zone
      */
-    public static boolean getDeadZone(Point2 tile) {
+    public static boolean getDeadZone(Tile tile) {
         return deadZoneCache[tile.x][tile.y];
+    }
+
+    /**
+     * Finds if a given point is in the dead zone.
+     * @param point The world grid point to check
+     * @return Whether the tile is in the dead zone
+     */
+    public static boolean getDeadZone(Point2 point) {
+        return deadZoneCache[point.x][point.y];
     }
 
     /**
