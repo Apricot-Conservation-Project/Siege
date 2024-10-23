@@ -96,6 +96,8 @@ public final class Setup {
             team.mindustryTeam = Team.all[team.id + 7];
             team.stringID = "[#" + team.mindustryTeam.color.toString().substring(0, 6) + "]" + team.id + "[]";
         }
+
+        Gamedata.initCache();
     }
 
     /**
@@ -141,9 +143,10 @@ public final class Setup {
         for (CoreBlock.CoreBuild core : cores) {
             Gamedata.reloadCore(core);
         }
+        Gamedata.reloadFloor();
         long endTime = System.currentTimeMillis();
         int elapsed = (int) (endTime - beginTime);
-        System.out.println(elapsed + " ms to make deadzone (" + Mathf.round(elapsed / (1000f / 60f), 0.01f) + " ticks at 60TPS)");
+        System.out.println(elapsed + " ms to generate and write floor (" + Mathf.round(elapsed / (1000f / 60f), 0.01f) + " ticks at 60TPS)");
 
         SiegePlugin.announce("[sky]Cores have been placed. Raiders and the Citadel can now build and attack. Good luck, and have fun!");
     }

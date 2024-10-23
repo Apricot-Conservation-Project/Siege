@@ -6,6 +6,7 @@ import mindustry.content.Blocks;
 import mindustry.game.Team;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.storage.CoreBlock;
 
 import java.util.ArrayList;
@@ -24,12 +25,25 @@ public final class Gamedata {
     // All true for setup, then cache set up when game begins
     // Should not be read or used at all during setup.
     private static boolean[][] deadZoneCache;
+    // The floor beneath the dead zone
+    private static Floor[][] actualFloor;
 
     public static void reset() {
         startTime = System.currentTimeMillis() + 1000 * Constants.SETUP_TIME_SECONDS;
         raiderTeams = new ArrayList<>();
         deadRaiderTeams = new ArrayList<>();
         gameOver = false;
+    }
+
+    public static void initCache() {
+        deadZoneCache = new boolean[world.width()][world.height()];
+        actualFloor = new Floor[world.width()][world.height()];
+        for (int x = 0; x < world.width(); x ++) {
+            for (int y = 0; y < world.height(); y++) {
+                deadZoneCache[x][y] = true;
+                actualFloor[x][y] = world.floor(x, y);
+            }
+        }
     }
 
     /**
@@ -130,15 +144,6 @@ public final class Gamedata {
      * @return Whether the tile is in the dead zone
      */
     public static boolean hardGetDeadZone(Point2 tile) {
-        if (deadZoneCache == null) {
-            deadZoneCache = new boolean[world.width()][world.height()];
-            for (int x = 0; x < world.width(); x ++) {
-                for (int y = 0; y < world.height(); y++) {
-                    deadZoneCache[x][y] = true;
-                }
-            }
-        }
-
         CoreBlock.CoreBuild[] cores = getAllCores();
 
         boolean result = true;
@@ -155,8 +160,37 @@ public final class Gamedata {
             }
         }
 
-        deadZoneCache[tile.x][tile.y] = result;
+        updateDeadZone(tile, result);
         return result;
+    }
+
+    private static void updateDeadZone(Point2 tile, boolean deadZone) {
+        deadZoneCache[tile.x][tile.y] = deadZone;
+        if (deadZone) {
+            world.tile(tile.x, tile.y).setFloorNet(Constants.DEAD_ZONE_FILLER_FLOOR);
+        } else {
+            world.tile(tile.x, tile.y).setFloorNet(actualFloor[tile.x][tile.y]);
+        }
+    }
+
+    /**
+     * Rewrites the entire map floor.
+     */
+    public static void reloadFloor() {
+        for (int x = 0; x < world.width(); x ++) {
+            for (int y = 0; y < world.height(); y++) {
+                Block floor = world.floor(x, y);
+                Block desiredFloor;
+                if (getDeadZone(new Point2(x, y))) {
+                    desiredFloor = Constants.DEAD_ZONE_FILLER_FLOOR;
+                } else {
+                    desiredFloor = actualFloor[x][y];
+                }
+                if (floor != desiredFloor) {
+                    world.tile(x, y).setFloorNet(desiredFloor);
+                }
+            }
+        }
     }
 
     public static void reloadCore(CoreBlock.CoreBuild core) {

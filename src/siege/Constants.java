@@ -14,7 +14,7 @@ import java.util.List;
 public class Constants {
     public static final int RAIDER_MAX_PLAYERS = 3;
 
-    public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.redStone;
+    public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.denseRedStone;
 
     public static final Seq<Block> CORE_TYPES = new Seq<>(new Block[]{Blocks.coreShard, Blocks.coreFoundation, Blocks.coreNucleus});
 
