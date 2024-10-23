@@ -143,7 +143,13 @@ public final class Gamedata {
 
         boolean result = true;
         for (CoreBlock.CoreBuild core : cores) {
-            if (tile.dst2(core.tileX(), core.tileY()) < getCoreSafetyRadius2(core.block)) {
+            float coreX = core.tileX();
+            float coreY = core.tileY();
+            if (core.block.size % 2 == 0) {
+                coreX += 0.5f;
+                coreY += 0.5f;
+            }
+            if ((Mathf.dst2(tile.x, tile.y, coreX, coreY)) < getCoreSafetyRadius2(core.block)) {
                 result = false;
                 break;
             }
