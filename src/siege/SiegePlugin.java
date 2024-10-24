@@ -1,12 +1,16 @@
 package siege;
 
 import arc.*;
+import arc.math.geom.Point2;
 import arc.util.*;
+import mindustry.content.Blocks;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.mod.*;
 import mindustry.world.blocks.storage.CoreBlock;
+
+import static mindustry.Vars.world;
 
 public class SiegePlugin extends Plugin {
 
@@ -42,6 +46,13 @@ public class SiegePlugin extends Plugin {
         Events.on(EventType.BlockDestroyEvent.class, event -> {
             if (Constants.CORE_TYPES.contains(event.tile.build.block)) {
                 coreDestroy(event.tile.build);
+            }
+        });
+
+        Events.on(EventType.BuildSelectEvent.class, event -> {
+            if (!event.breaking && Gamedata.getDeadZone(new Point2(event.tile.x, event.tile.y))) {
+                world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
+                world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
             }
         });
     }
