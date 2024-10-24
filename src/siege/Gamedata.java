@@ -203,10 +203,10 @@ public final class Gamedata {
         // Reload deadzone cache around core
         float radius = Gamedata.getCoreSafetyRadius(core.block);
 
-        int minX = Mathf.floor(core.tileX() - radius - 1);
-        int minY = Mathf.floor(core.tileY() - radius - 1);
-        int maxX = Mathf.ceil(core.tileX() + radius + 1);
-        int maxY = Mathf.ceil(core.tileY() + radius + 1);
+        int minX = Math.max(0, Mathf.floor(core.tileX() - radius - 1));
+        int minY = Math.max(0, Mathf.floor(core.tileY() - radius - 1));
+        int maxX = Math.min(world.width() - 1, Mathf.ceil(core.tileX() + radius + 1));
+        int maxY = Math.min(world.width() - 1, Mathf.ceil(core.tileY() + radius + 1));
         for (int x = minX; x < maxX; x ++) {
             for (int y = minY; y < maxY; y++) {
                 Gamedata.hardGetDeadZone(new Point2(x, y));
