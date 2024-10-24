@@ -12,8 +12,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import static mindustry.Vars.state;
-import static mindustry.Vars.world;
+import static mindustry.Vars.*;
 
 /**
  * Manages game setup. Should not be used once Gamedata.gameStarted is true.
@@ -115,7 +114,7 @@ public final class Setup {
             for (PersistentPlayer player : team.players) {
                 if (player.online) {
                     // x, y = 8 * tileX, tileY
-                    points.add(new Point2D.Float(player.currentPlayer.x / 8.0f, player.currentPlayer.tileOn().worldy() / 8.0f));
+                    points.add(new Point2D.Float(player.currentPlayer.x / tilesize, player.currentPlayer.tileOn().worldy() / tilesize));
                 }
             }
             // Kick team if it has no online players at game start

@@ -27,6 +27,7 @@ public final class Gamedata {
     private static boolean[][] deadZoneCache;
     // The floor beneath the dead zone
     private static Floor[][] actualFloor;
+    private static Floor[][] actualOverlay;
 
     public static void reset() {
         startTime = System.currentTimeMillis() + 1000 * Constants.SETUP_TIME_SECONDS;
@@ -38,10 +39,12 @@ public final class Gamedata {
     public static void initCache() {
         deadZoneCache = new boolean[world.width()][world.height()];
         actualFloor = new Floor[world.width()][world.height()];
+        actualOverlay = new Floor[world.width()][world.height()];
         for (int x = 0; x < world.width(); x ++) {
             for (int y = 0; y < world.height(); y++) {
                 deadZoneCache[x][y] = true;
-                actualFloor[x][y] = world.floor(x, y);
+                actualFloor[x][y] = world.tile(x, y).floor();
+                actualOverlay[x][y] = world.tile(x, y).overlay();
             }
         }
     }
@@ -169,7 +172,7 @@ public final class Gamedata {
         if (deadZone) {
             world.tile(tile.x, tile.y).setFloorNet(Constants.DEAD_ZONE_FILLER_FLOOR);
         } else {
-            world.tile(tile.x, tile.y).setFloorNet(actualFloor[tile.x][tile.y]);
+            world.tile(tile.x, tile.y).setFloorNet(actualFloor[tile.x][tile.y], actualOverlay[tile.x][tile.y]);
         }
     }
 
@@ -181,13 +184,16 @@ public final class Gamedata {
             for (int y = 0; y < world.height(); y++) {
                 Block floor = world.floor(x, y);
                 Block desiredFloor;
+                Block desiredOverlay;
                 if (getDeadZone(new Point2(x, y))) {
                     desiredFloor = Constants.DEAD_ZONE_FILLER_FLOOR;
+                    desiredOverlay = Blocks.air;
                 } else {
                     desiredFloor = actualFloor[x][y];
+                    desiredOverlay = actualOverlay[x][y];
                 }
                 if (floor != desiredFloor) {
-                    world.tile(x, y).setFloorNet(desiredFloor);
+                    world.tile(x, y).setFloorNet(desiredFloor, desiredOverlay);
                 }
             }
         }
