@@ -58,14 +58,21 @@ public class SiegePlugin extends Plugin {
     }
 
     private static void update() {
-        if (!Gamedata.gameOver) {
-            alwaysUpdate();
+        try {
+            if (!Gamedata.gameOver) {
+                alwaysUpdate();
 
-            if (!Gamedata.gameStarted) {
-                Setup.update();
-            } else if (!Gamedata.gameOver) {
-                gameUpdate();
+                if (!Gamedata.gameStarted) {
+                    Setup.update();
+                } else if (!Gamedata.gameOver) {
+                    gameUpdate();
+                }
             }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            Gamedata.dataDump();
+            announce("[red]Exception thrown during tick update");
         }
     }
 
