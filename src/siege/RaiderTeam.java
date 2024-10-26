@@ -1,6 +1,7 @@
 package siege;
 
 import arc.math.Mathf;
+import arc.math.geom.Point2;
 import arc.util.CommandHandler;
 import arc.util.Time;
 import mindustry.game.Team;
@@ -10,9 +11,11 @@ import mindustry.gen.Unit;
 import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import static mindustry.Vars.tilesize;
 import static mindustry.Vars.world;
 
 public class RaiderTeam {
@@ -50,6 +53,24 @@ public class RaiderTeam {
     public RaiderTeam(Player initialPlayer) {
         this();
         players.add(PersistentPlayer.fromPlayer(initialPlayer));
+    }
+
+    public Point2 corePlacementPosition() {
+        // Get position of all online players
+        List<Point2D.Float> points = new ArrayList<>();
+        for (PersistentPlayer player : players) {
+            if (player.online) {
+                // x, y = 8 * tileX, tileY
+                points.add(new Point2D.Float(player.currentPlayer.x / tilesize, player.currentPlayer.tileOn().worldy() / tilesize));
+            }
+        }
+
+        // TODO Move away from central core
+        // TODO Add core placement priorities, move away from higher priority cores
+        // TODO Prevent terrain intersection
+
+        Point2D.Float core = geometricMedian(points.toArray(new Point2D.Float[0]), 0.05f);
+        return new Point2(Mathf.round(core.x - 0.5f), Mathf.round(core.y - 0.5f));
     }
 
     /**
@@ -385,5 +406,67 @@ public class RaiderTeam {
             // Start a vote to kick the target player from your team
             // TODO
         }
+    }
+
+    // Finds the point with the least sum distance to all given points, accurate to within the given precision.
+    // Probably does not need to ever be touched again
+    private static Point2D.Float geometricMedian(Point2D.Float[] points, float precision) {
+        if (points.length == 0) {
+            throw new IllegalArgumentException("Point array cannot have length zero.");
+        }
+        if (points.length == 1) {
+            return points[0];
+        }
+        // Get average point to start geometric median approximation
+        float sumX = 0, sumY = 0;
+        for (Point2D.Float point : points) {
+            sumX += point.x;
+            sumY += point.y;
+        }
+        if (points.length == 2) {
+            return new Point2D.Float(sumX / points.length, sumY / points.length);
+        }
+        final Point2D.Float mean = new Point2D.Float(sumX / points.length, sumY / points.length);
+        // samples[0] = center point (starts at mean)
+        Point2D.Float[] samples = new Point2D.Float[] {mean, new Point2D.Float(), new Point2D.Float(), new Point2D.Float(), new Point2D.Float()};
+        // Start with precision equal to the greatest distance between any point and the mean
+        float currentPrecision = Float.MIN_VALUE;
+        for (Point2D.Float point : points) {
+            float distance = (float) point.distance(mean);
+            if (distance > currentPrecision) {
+                currentPrecision = distance;
+            }
+        }
+        Point2D.Float[] offsets = new Point2D.Float[] {new Point2D.Float(0, 0), new Point2D.Float(-currentPrecision, -currentPrecision), new Point2D.Float(-currentPrecision, currentPrecision), new Point2D.Float(currentPrecision, -currentPrecision), new Point2D.Float(currentPrecision, currentPrecision)};
+        Point2D.Float median;
+        // Test a center point and cross of four nearby points, the best median approximation becomes the center for the next round, if the center is best, finish.
+        while (true) {
+            double minDistance = Double.MAX_VALUE;
+            int minIndex = -1;
+            for (int i = 0; i < offsets.length; i++) {
+                Point2D.Float offset = offsets[i];
+                Point2D.Float sample = new Point2D.Float(samples[0].x + offset.x, samples[0].y + offset.y);
+                double sumDistance = 0;
+                for (Point2D.Float point : points) {
+                    sumDistance += point.distance(sample);
+                }
+                if (sumDistance < minDistance - 0.00000000001) {
+                    minDistance = sumDistance;
+                    minIndex = i;
+                }
+            }
+            if (minIndex == 0) {
+                // Use successively finer precision until needs are satisfied
+                if (currentPrecision <= precision) {
+                    median = samples[0];
+                    break;
+                }
+                currentPrecision = currentPrecision / 2f;
+                offsets = new Point2D.Float[] {new Point2D.Float(0, 0), new Point2D.Float(-currentPrecision, -currentPrecision), new Point2D.Float(-currentPrecision, currentPrecision), new Point2D.Float(currentPrecision, -currentPrecision), new Point2D.Float(currentPrecision, currentPrecision)};
+                continue;
+            }
+            samples[0] = samples[minIndex];
+        }
+        return median;
     }
 }
