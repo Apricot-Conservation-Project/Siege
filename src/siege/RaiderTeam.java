@@ -191,7 +191,45 @@ public class RaiderTeam {
         Gamedata.deadRaiderTeams.add(this);
         Gamedata.raiderTeams.remove(this);
 
-        // Kill all the team's units and blocks.
+        killAll();
+
+        // Put all players into Citadel team
+        for (PersistentPlayer player : players) {
+            if (player.online) {
+                if (player.currentPlayer.team() != Team.green) {
+                    player.currentPlayer.team(Team.green);
+                }
+                if (player.currentPlayer.dead()) {
+                    CoreBlock.playerSpawn(Team.green.cores().random().tile, player.currentPlayer);
+                }
+            }
+        }
+    }
+
+    /**
+     * Call when a team must be disqualified due to a failure to a fundamental game action.
+     * Does not explain error to team members.
+     */
+    public void technicalErrorDisqualified() {
+        for (Player player : Groups.player) {
+            PersistentPlayer persistentPlayer = PersistentPlayer.fromPlayer(player);
+            if (!this.players.contains(persistentPlayer)) {
+                player.sendMessage("[orange]Team " + stringID + " has been disqualified for failure to accomplish a fundamental game action.");
+            } else {
+                player.team(Team.green);
+                if (player.dead()) {
+                    CoreBlock.playerSpawn(Team.green.cores().random().tile, player);
+                }
+            }
+        }
+
+        Gamedata.raiderTeams.remove(this);
+
+        killAll();
+    }
+
+    // Kill all the team's units and blocks.
+    private void killAll() {
         for (int x = 0; x < world.width(); x++) {
             for (int y = 0; y < world.height(); y++) {
                 Tile tile = world.tile(x, y);
@@ -203,18 +241,6 @@ public class RaiderTeam {
         for (Unit u : Groups.unit) {
             if (u.team == mindustryTeam) {
                 u.kill();
-            }
-        }
-
-        // Put all players into Citadel team
-        for (PersistentPlayer player : players) {
-            if (player.online) {
-                if (player.currentPlayer.team() != Team.green) {
-                    player.currentPlayer.team(Team.green);
-                }
-                if (player.currentPlayer.dead()) {
-                    CoreBlock.playerSpawn(Team.green.cores().random().tile, player.currentPlayer);
-                }
             }
         }
     }

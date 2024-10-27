@@ -12,7 +12,7 @@ import mindustry.world.blocks.storage.CoreBlock;
 
 import static mindustry.Vars.world;
 
-public class SiegePlugin extends Plugin {
+public final class SiegePlugin extends Plugin {
 
     @Override
     public void init() {

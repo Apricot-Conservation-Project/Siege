@@ -12,7 +12,7 @@ import mindustry.world.Block;
 
 import java.util.List;
 
-public class Constants {
+public final class Constants {
     public static final int RAIDER_MAX_PLAYERS = 3;
 
     public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.denseRedStone;
