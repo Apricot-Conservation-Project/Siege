@@ -121,7 +121,29 @@ public final class Setup {
                 continue;
             }
 
-            Point2 corePoint = team.corePlacementPosition();
+            long startTime = System.currentTimeMillis();
+            Utilities.Tuple<Point2, Boolean> coreGetOutput = team.corePlacementPosition(true);
+            long endTime = System.currentTimeMillis();
+            long elapsedTime = endTime - startTime;
+            System.out.println("Finished core search for team " + team.id + " in " + elapsedTime + " ms (" + (elapsedTime / (1000f / 60f)) + " ticks at 60TPS)");
+
+            if (coreGetOutput == null) {
+                for (PersistentPlayer player : team.players) {
+                    if (player.online) {
+                        player.currentPlayer.sendMessage("[red]Your core could not be placed, as your desired location was too distant from one in which it would be valid. You will be returned to the Citadel team.");
+                    }
+                }
+                team.technicalErrorDisqualified();
+                continue;
+            }
+            if (coreGetOutput.b) {
+                for (PersistentPlayer player : team.players) {
+                    if (player.online) {
+                        player.currentPlayer.sendMessage("[accent]Your core's position had to be adjusted, as it would have been placed in an invalid position.");
+                    }
+                }
+            }
+            Point2 corePoint = coreGetOutput.a;
             Tile tile = world.tile(corePoint.x, corePoint.y); // Subtract 1 because of how foundations 'center' tile are measured
             tile.setNet(Blocks.coreFoundation, team.mindustryTeam, 0);
             state.teams.registerCore((CoreBlock.CoreBuild) tile.build);
@@ -142,7 +164,7 @@ public final class Setup {
         Gamedata.reloadFloor();
         long endTime = System.currentTimeMillis();
         int elapsed = (int) (endTime - beginTime);
-        System.out.println(elapsed + " ms to generate and write floor (" + Mathf.round(elapsed / (1000f / 60f), 0.01f) + " ticks at 60TPS)");
+        System.out.println(elapsed + " ms to generate and write floor (" + (elapsed / (1000f / 60f)) + " ticks at 60TPS)");
 
         SiegePlugin.announce("[sky]Cores have been placed. Raiders and the Citadel can now build and attack. Good luck, and have fun!");
     }

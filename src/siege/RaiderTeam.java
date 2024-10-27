@@ -17,6 +17,7 @@ import java.util.List;
 
 import static mindustry.Vars.tilesize;
 import static mindustry.Vars.world;
+import static siege.Utilities.geometricMedian;
 
 public class RaiderTeam {
     public int id;
@@ -55,7 +56,12 @@ public class RaiderTeam {
         players.add(PersistentPlayer.fromPlayer(initialPlayer));
     }
 
-    public Point2 corePlacementPosition() {
+    /**
+     * Finds the location that a team would place their starting core
+     * @param adjust Whether to adjust the result to avoid terrain and other conflicting cores
+     * @return A tuple containing the index of the tile where the core would go, and a boolean representing whether the core had to be adjusted significantly. Can be null if the operation fails to locate a valid position.
+     */
+    public Utilities.Tuple<Point2, Boolean> corePlacementPosition(boolean adjust) {
         // Get position of all online players
         List<Point2D.Float> points = new ArrayList<>();
         for (PersistentPlayer player : players) {
@@ -65,12 +71,107 @@ public class RaiderTeam {
             }
         }
 
-        // TODO Move away from central core
-        // TODO Add core placement priorities, move away from higher priority cores
-        // TODO Prevent terrain intersection
+        Point2D.Float coreFloat = geometricMedian(points.toArray(new Point2D.Float[0]), 0.05f);
+        Point2 adjustedCorePosition = new Point2(Mathf.round(coreFloat.x - 0.5f), Mathf.round(coreFloat.y - 0.5f));
+        if (!adjust) {
+            return new Utilities.Tuple<>(adjustedCorePosition, false);
+        }
 
-        Point2D.Float core = geometricMedian(points.toArray(new Point2D.Float[0]), 0.05f);
-        return new Point2(Mathf.round(core.x - 0.5f), Mathf.round(core.y - 0.5f));
+        final float coreDistance2 = Mathf.sqr(Constants.CORE_PLACEMENT_MIN_DISTANCE);
+        final float coreCitadelDistance2 = Mathf.sqr(Constants.CORE_PLACEMENT_CITADEL_MIN_DISTANCE);
+        CoreBlock.CoreBuild[] cores = Gamedata.getAllCores();
+
+        // If within core no-core radius, leave core no-core radius.
+        for (CoreBlock.CoreBuild core : cores) {
+            float radius = Constants.CORE_PLACEMENT_MIN_DISTANCE;
+            if (core.team() == Team.green) {
+                radius = Constants.CORE_PLACEMENT_CITADEL_MIN_DISTANCE;
+            }
+            if (adjustedCorePosition.dst(core.tileX(), core.tileY()) < 5 + radius - Constants.MAX_DISTANCE_TO_VIABLE_CORE_LOCATION) {
+                if (adjustedCorePosition.x == core.tileX() && adjustedCorePosition.y == core.tileY()) {
+                    adjustedCorePosition.x ++;
+                }
+                int dx = adjustedCorePosition.x - core.tileX();
+                int dy = adjustedCorePosition.y - core.tileY();
+                float currentDistance = Mathf.sqrt(dx * dx + dy * dy);
+                float distanceScale = radius / currentDistance;
+                adjustedCorePosition = new Point2((int) (core.tileX() + distanceScale * dx), (int) (core.tileY() + distanceScale * dy));
+            }
+        }
+
+        // Progressively scan further out from the desired location until an accessible point is found and confirmed to be the closest point
+        Point2 closestCorable = null;
+        float closestDistance2 = Float.MAX_VALUE;
+        int radius = 0;
+        float maxDistanceToCheck2 = Mathf.sqr(Constants.MAX_DISTANCE_TO_VIABLE_CORE_LOCATION);
+        while (true) {
+            if (radius > Constants.MAX_DISTANCE_TO_VIABLE_CORE_LOCATION) {
+                System.out.println("Brute force core search timed out for team " + id);
+                return null;
+            }
+
+            ArrayList<Point2> samples = new ArrayList<>(radius * 8);
+            if (radius == 0) {
+                samples = new ArrayList<>(1);
+                samples.add(adjustedCorePosition);
+            } else { // Add all points in the outer square to samples
+                int[] yOffsets = new int[] {-radius, radius};
+                for (int yOffset : yOffsets) {
+                    for (int xOffset = -radius + 1; xOffset <= radius - 1; xOffset++) {
+                        // Discard samples incapable of being useful
+                        if ((xOffset * xOffset + yOffset * yOffset) > maxDistanceToCheck2) {
+                            continue;
+                        }
+                        samples.add(new Point2(xOffset + adjustedCorePosition.x, yOffset + adjustedCorePosition.y));
+                    }
+                }
+                int[] xOffsets = new int[] {-radius, radius};
+                for (int xOffset : xOffsets) {
+                    for (int yOffset = -radius; yOffset <= radius; yOffset++) {
+                        if ((xOffset * xOffset + yOffset * yOffset) > maxDistanceToCheck2) {
+                            continue;
+                        }
+                        samples.add(new Point2(xOffset + adjustedCorePosition.x, yOffset + adjustedCorePosition.y));
+                    }
+                }
+            }
+
+            samples: for (Point2 sample : samples) {
+                // Check for terrain collisions
+                for (Point2 offset : Constants.Performance.COLLISION_OFFSETS) {
+                    Point2 corner = new Point2(sample.x + offset.x, sample.y + offset.y);
+                    if (corner.x < 0 || corner.x >= world.width() || corner.y < 0 || corner.y >= world.height()) {
+                        continue samples; // Cores cannot be out of bounds
+                    }
+                    if (world.tile(corner.x, corner.y).solid()) {
+                        continue samples; // Cores cannot be placed in solid blocks
+                    }
+                }
+                // Check for core vicinity
+                for (CoreBlock.CoreBuild core : cores) {
+                    if (sample.dst2(core.tileX(), core.tileY()) < coreDistance2) {
+                        continue samples; // Cores cannot be placed too close to other cores
+                    }
+                    if (core.team() == Team.green && sample.dst2(core.tileX(), core.tileY()) < coreCitadelDistance2) {
+                        continue samples;// Cores cannot be placed too close to citadel cores
+                    }
+                }
+
+                float distance2 = sample.dst2(adjustedCorePosition);
+                if (distance2 < closestDistance2) {
+                    closestDistance2 = distance2;
+                    closestCorable = sample;
+                }
+            }
+
+            if (closestDistance2 <= radius * radius) {
+                break;
+            }
+
+            radius ++;
+        }
+
+        return new Utilities.Tuple<>(closestCorable, /*cycles > 1 || */radius != 0);
     }
 
     /**
@@ -406,67 +507,5 @@ public class RaiderTeam {
             // Start a vote to kick the target player from your team
             // TODO
         }
-    }
-
-    // Finds the point with the least sum distance to all given points, accurate to within the given precision.
-    // Probably does not need to ever be touched again
-    private static Point2D.Float geometricMedian(Point2D.Float[] points, float precision) {
-        if (points.length == 0) {
-            throw new IllegalArgumentException("Point array cannot have length zero.");
-        }
-        if (points.length == 1) {
-            return points[0];
-        }
-        // Get average point to start geometric median approximation
-        float sumX = 0, sumY = 0;
-        for (Point2D.Float point : points) {
-            sumX += point.x;
-            sumY += point.y;
-        }
-        if (points.length == 2) {
-            return new Point2D.Float(sumX / points.length, sumY / points.length);
-        }
-        final Point2D.Float mean = new Point2D.Float(sumX / points.length, sumY / points.length);
-        // samples[0] = center point (starts at mean)
-        Point2D.Float[] samples = new Point2D.Float[] {mean, new Point2D.Float(), new Point2D.Float(), new Point2D.Float(), new Point2D.Float()};
-        // Start with precision equal to the greatest distance between any point and the mean
-        float currentPrecision = Float.MIN_VALUE;
-        for (Point2D.Float point : points) {
-            float distance = (float) point.distance(mean);
-            if (distance > currentPrecision) {
-                currentPrecision = distance;
-            }
-        }
-        Point2D.Float[] offsets = new Point2D.Float[] {new Point2D.Float(0, 0), new Point2D.Float(-currentPrecision, -currentPrecision), new Point2D.Float(-currentPrecision, currentPrecision), new Point2D.Float(currentPrecision, -currentPrecision), new Point2D.Float(currentPrecision, currentPrecision)};
-        Point2D.Float median;
-        // Test a center point and cross of four nearby points, the best median approximation becomes the center for the next round, if the center is best, finish.
-        while (true) {
-            double minDistance = Double.MAX_VALUE;
-            int minIndex = -1;
-            for (int i = 0; i < offsets.length; i++) {
-                Point2D.Float offset = offsets[i];
-                Point2D.Float sample = new Point2D.Float(samples[0].x + offset.x, samples[0].y + offset.y);
-                double sumDistance = 0;
-                for (Point2D.Float point : points) {
-                    sumDistance += point.distance(sample);
-                }
-                if (sumDistance < minDistance - 0.00000000001) {
-                    minDistance = sumDistance;
-                    minIndex = i;
-                }
-            }
-            if (minIndex == 0) {
-                // Use successively finer precision until needs are satisfied
-                if (currentPrecision <= precision) {
-                    median = samples[0];
-                    break;
-                }
-                currentPrecision = currentPrecision / 2f;
-                offsets = new Point2D.Float[] {new Point2D.Float(0, 0), new Point2D.Float(-currentPrecision, -currentPrecision), new Point2D.Float(-currentPrecision, currentPrecision), new Point2D.Float(currentPrecision, -currentPrecision), new Point2D.Float(currentPrecision, currentPrecision)};
-                continue;
-            }
-            samples[0] = samples[minIndex];
-        }
-        return median;
     }
 }

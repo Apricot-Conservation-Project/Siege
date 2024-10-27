@@ -1,5 +1,6 @@
 package siege;
 
+import arc.math.geom.Point2;
 import arc.struct.Seq;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
@@ -17,6 +18,10 @@ public class Constants {
     public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.denseRedStone;
 
     public static final Seq<Block> CORE_TYPES = new Seq<>(new Block[]{Blocks.coreShard, Blocks.coreFoundation, Blocks.coreNucleus});
+
+    public static final float CORE_PLACEMENT_MIN_DISTANCE = 120f;
+    public static final float CORE_PLACEMENT_CITADEL_MIN_DISTANCE = 225f;
+    public static final int MAX_DISTANCE_TO_VIABLE_CORE_LOCATION = 80; // The farthest the algorithm for core placement will adjust an invalid core.
 
     public static final float SHARD_DEAD_ZONE_RADIUS = 30f;
     public static final float FOUNDATION_DEAD_ZONE_RADIUS = 40f;
@@ -46,4 +51,29 @@ public class Constants {
             Items.copper, 500,
             Items.lead, 300
     ));
+
+
+
+    public static final class Performance {
+        // All 16 points within an integer grid from -1 to 2 (All point offsets within a Foundation core from that core's tile x and y)
+        // Arranged in order such that a collision should be found as early in the list as possible.
+        public static final Point2[] COLLISION_OFFSETS = new Point2[] {
+                new Point2(-1, -1),
+                new Point2(-1, 2),
+                new Point2(2, -1),
+                new Point2(2, 2),
+                new Point2(-1, 0),
+                new Point2(-1, 1),
+                new Point2(2, 0),
+                new Point2(2, 1),
+                new Point2(0, -1),
+                new Point2(1, -1),
+                new Point2(0, 2),
+                new Point2(1, 2),
+                new Point2(0, 0),
+                new Point2(0, 1),
+                new Point2(1, 0),
+                new Point2(1, 1)
+        };
+    }
 }
