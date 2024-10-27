@@ -97,8 +97,8 @@ public final class Utilities {
         /**
          * Returns one of the tuple's values, treating the first as index 0 and the second as index 1.
          *
-         * @param index
-         * @return Object
+         * @param index The index of the value to retrieve
+         * @return The value in the tuple at the given index
          */
         public Object get(int index) {
             assert index == 0 || index == 1;
@@ -131,12 +131,12 @@ public final class Utilities {
      */
     public static class ArrayGrid<T> {
         // Outer represents columns, inner rows
-        private ArrayList<ArrayList<T>> quadrant1; // +, +
-        private ArrayList<ArrayList<T>> quadrant2; // -, +
-        private ArrayList<ArrayList<T>> quadrant3; // -, -
-        private ArrayList<ArrayList<T>> quadrant4; // +, -
+        private final ArrayList<ArrayList<T>> quadrant1; // +, +
+        private final ArrayList<ArrayList<T>> quadrant2; // -, +
+        private final ArrayList<ArrayList<T>> quadrant3; // -, -
+        private final ArrayList<ArrayList<T>> quadrant4; // +, -
 
-        private T defaultValue;
+        private final T defaultValue;
         private int lowerBoundX;
         private int lowerBoundY;
         private int upperBoundX;
