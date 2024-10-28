@@ -143,8 +143,9 @@ public class RaiderTeam {
                     if (corner.x < 0 || corner.x >= world.width() || corner.y < 0 || corner.y >= world.height()) {
                         continue samples; // Cores cannot be out of bounds
                     }
-                    if (world.tile(corner.x, corner.y).solid()) {
-                        continue samples; // Cores cannot be placed in solid blocks
+                    Tile tile = world.tile(corner.x, corner.y);
+                    if (tile.solid() || !tile.floor().placeableOn) {
+                        continue samples; // Cores cannot be placed in solid blocks or on deep liquids or void
                     }
                 }
                 // Check for core vicinity
