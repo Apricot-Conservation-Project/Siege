@@ -50,7 +50,7 @@ public final class SiegePlugin extends Plugin {
         });
 
         Events.on(EventType.BuildSelectEvent.class, event -> {
-            if (!event.breaking && Gamedata.getDeadZone(new Point2(event.tile.x, event.tile.y))) {
+            if (!Gamedata.gameStarted || (!event.breaking && Gamedata.getDeadZone(new Point2(event.tile.x, event.tile.y)))) {
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
             }
