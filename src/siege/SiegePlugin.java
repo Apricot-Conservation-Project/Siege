@@ -211,6 +211,27 @@ public final class SiegePlugin extends Plugin {
                 core.tile.setAir();
             }
         });
+        handler.<Player>register("money", "free money", (args, player) -> {
+            Team team = player.team();
+            team.items().add(new ItemSeq(ItemStack.list(
+                    Items.copper, 10000,
+                    Items.lead, 10000,
+                    Items.metaglass, 10000,
+                    Items.graphite, 10000,
+                    Items.sand, 10000,
+                    Items.coal, 10000,
+                    Items.titanium, 10000,
+                    Items.thorium, 10000,
+                    Items.scrap, 10000,
+                    Items.silicon, 10000,
+                    Items.plastanium, 10000,
+                    Items.phaseFabric, 10000,
+                    Items.surgeAlloy, 10000,
+                    Items.sporePod, 10000,
+                    Items.blastCompound, 10000,
+                    Items.pyratite, 10000
+            )));
+        });
     }
 
     @Override
