@@ -1,14 +1,21 @@
 package siege;
 
 import arc.*;
+import arc.math.Mathf;
 import arc.math.geom.Point2;
+import arc.struct.Seq;
 import arc.util.*;
 import mindustry.content.Blocks;
+import mindustry.content.Items;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.mod.*;
+import mindustry.type.ItemSeq;
+import mindustry.type.ItemStack;
+import mindustry.world.Block;
 import mindustry.world.blocks.storage.CoreBlock;
+import mindustry.world.modules.ItemModule;
 
 import static mindustry.Vars.world;
 
@@ -55,6 +62,12 @@ public final class SiegePlugin extends Plugin {
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
             }
         });
+
+        Events.on(EventType.TapEvent.class, event -> {
+            if (event.tile.build != null && event.tile.build.block == Blocks.vault) {
+                attemptCore(event.tile.build, event.player);
+            }
+        });
     }
 
     private static void update() {
@@ -76,6 +89,10 @@ public final class SiegePlugin extends Plugin {
         }
     }
 
+    /**
+     * Called when a core is destroyed.
+     * @param core The core which was destroyed
+     */
     public static void coreDestroy(Building core) {
         // Notify team's players about dead core
         for (Player player : Groups.player) {
@@ -85,6 +102,70 @@ public final class SiegePlugin extends Plugin {
         }
 
         Gamedata.reloadCore((CoreBlock.CoreBuild) core);
+    }
+
+    /**
+     * Attempts to convert a vault into a core. Only succeeds when rules are followed.
+     * @param vault The vault to possibly convert into a core
+     * @param executor The player attempting to build the core. Can be null to execute with no feedback.
+     * @return Whether the vault was converted into a core
+     */
+    public static boolean attemptCore(Building vault, Player executor) {
+        Team team = vault.team();
+        ItemModule vaultContents = vault.items.copy();
+        ItemModule coreContents = team.items().copy();
+        // Can the vault satisfy local costs?
+        for (ItemStack items : Constants.CONSTANT_CORE_PRICE_LOCAL) {
+            if (!vaultContents.has(items.item, items.amount)) {
+                if (executor != null) {
+                    executor.sendMessage("[red]Could not build core. A vault needs to have " + Utilities.itemSeqToString(Constants.CONSTANT_CORE_PRICE_LOCAL) + " inside it in order to become a core.");
+                }
+                return false;
+            }
+        }
+        // Spend local price and add remaining contents to core
+        vaultContents.remove(Constants.CONSTANT_CORE_PRICE_LOCAL);
+        coreContents.add(vaultContents);
+        // Find total core-consuming price
+        Seq<CoreBlock.CoreBuild> cores = team.cores();
+        ItemSeq globalPrice = Constants.CONSTANT_CORE_PRICE_GLOBAL.copy();
+        for (int i = 0; i < cores.size; i++) {
+            globalPrice.add(Constants.PER_CORE_PRICE);
+        }
+        // Find harmonic distance
+        double divisor = 0;
+        for (CoreBlock.CoreBuild core : cores) {
+            double dx = vault.tileX() - core.tileX();
+            double dy = vault.tileY() - core.tileY();
+            double dist2 = dx * dx + dy * dy + 1;
+            divisor += 1.0f / Math.sqrt(dist2);
+        }
+        double harmonicFactor = Mathf.pow((float)cores.size, Constants.HARMONIC_CORE_COUNT_POWER_FACTOR) / divisor;
+        globalPrice.add(Utilities.multiplyItemSeq(Constants.HARMONIC_DISTANCE_CORE_PRICE, harmonicFactor));
+        // Can the team afford the price?
+        for (ItemStack items : globalPrice) {
+            if (!team.items().has(items.item, items.amount)) {
+                // Does not have enough.
+                if (executor != null) {
+                    ItemSeq remaining = new ItemSeq();
+                    for (ItemStack itemStack : globalPrice) {
+                        if (!team.items().has(itemStack.item, itemStack.amount)) {
+                            remaining.add(new ItemStack(itemStack.item, itemStack.amount - team.items().get(itemStack.item)));
+                        }
+                    }
+                    executor.sendMessage("[red]Could not build core. You are missing " + Utilities.itemSeqToString(remaining) + ".");
+                }
+                return false;
+            }
+        }
+        coreContents.remove(globalPrice);
+        team.items().set(coreContents);
+
+        final Block core = Blocks.coreShard;
+        vault.tile.setNet(core, team, 0);
+        Gamedata.reloadCore((CoreBlock.CoreBuild) vault.tile.build);
+
+        return true;
     }
 
     /**

@@ -36,6 +36,37 @@ public final class Constants {
             UnitTypes.gamma,
     });
 
+    // Must be charged from the vault
+    public static final ItemSeq CONSTANT_CORE_PRICE_LOCAL = new ItemSeq(ItemStack.list(
+            Items.thorium, 1000,
+            Items.phaseFabric, 200
+    ));
+
+    // Chargeable from vault or team storage
+    public static final ItemSeq CONSTANT_CORE_PRICE_GLOBAL = new ItemSeq(ItemStack.list(
+            Items.plastanium, 400,
+            Items.silicon, 300,
+            Items.copper, 1000,
+            Items.lead, 200
+    ));
+
+    // Chargeable from vault or team storage
+    // Charged according to total number of cores built before the desired core
+    public static final ItemSeq PER_CORE_PRICE = new ItemSeq(ItemStack.list(
+            Items.plastanium, 200,
+            Items.thorium, 500,
+            Items.phaseFabric, 1000,
+            Items.silicon, 1000
+    ));
+
+    // Black magic
+    public static final float HARMONIC_CORE_COUNT_POWER_FACTOR = 0.6f;
+    public static final ItemSeq HARMONIC_DISTANCE_CORE_PRICE = new ItemSeq(ItemStack.list(
+            Items.phaseFabric, 50,
+            Items.silicon, 250,
+            Items.surgeAlloy, 150
+    ));
+
     public static final int TEAM_SETUP_TIME_SECONDS = 120;
     public static final int CORE_PLACEMENT_TIME_SECONDS = 60;
     public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
