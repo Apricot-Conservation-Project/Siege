@@ -1,6 +1,11 @@
 package siege;
 
 import arc.math.geom.Point2;
+import mindustry.content.Items;
+import mindustry.type.Item;
+import mindustry.type.ItemSeq;
+import mindustry.type.ItemStack;
+import mindustry.world.modules.ItemModule;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -72,6 +77,53 @@ public final class Utilities {
             samples[0] = samples[minIndex];
         }
         return median;
+    }
+
+    /**
+     * Converts an ItemModule into an ItemSeq.
+     * @param module The itemModule to convert into an itemSeq
+     * @return An ItemSeq representing all the contents of the itemModule at the time of reading.
+     */
+    public static ItemSeq itemModuleToSeq(ItemModule module) {
+        ItemSeq seq = new ItemSeq();
+        for (Item item : Items.serpuloItems) {
+            int amount = module.get(item);
+            seq.add(new ItemStack(item, amount));
+        }
+        return seq;
+    }
+
+    /**
+     * Multiplies the contents of an ItemSeq by a factor.
+     * @param itemSeq The items to scale
+     * @param factor The factor to scale the items by
+     * @return A new ItemSeq consisting of the factor times the contents of the input
+     */
+    public static ItemSeq multiplyItemSeq(ItemSeq itemSeq, double factor) {
+        ItemSeq product = new ItemSeq();
+        for (ItemStack itemStack : itemSeq) {
+            product.add( new ItemStack(itemStack.item, (int) Math.round(itemStack.amount * factor)) );
+        }
+        return product;
+    }
+
+    public static String itemSeqToString(ItemSeq itemSeq) {
+        StringBuilder sb = new StringBuilder();
+        ItemStack[] items = itemSeq.toArray();
+        for (int i = 0; i < items.length; i++) {
+            sb.append(items[i].amount + " " + items[i].item.toString());
+            if (i < items.length - 1) {
+                if (items.length == 2) {
+                    sb.append(" ");
+                } else {
+                    sb.append(", ");
+                }
+            }
+            if (i == items.length - 2) {
+                sb.append("and ");
+            }
+        }
+        return sb.toString();
     }
 
     /**
