@@ -249,7 +249,7 @@ public class RaiderTeam {
 
 
     /**
-     * Finds a player's team
+     * Finds a player's team.
      * @param player Any player
      * @return The player's team if they are in one, otherwise null
      */
@@ -260,6 +260,23 @@ public class RaiderTeam {
             }
         }
 
+        return null;
+    }
+
+    /**
+     * Finds a raider team given their internal team.
+     * @param team The mindustry base team belonging to the desired raider team
+     * @return The raider team associated with the given Team
+     */
+    public static RaiderTeam getTeam(Team team) {
+        if (team.id < Constants.TEAM_STARTING_ID) {
+            return null;
+        }
+        for (RaiderTeam raiderTeam : Gamedata.raiderTeams) {
+            if (raiderTeam.mindustryTeam == team) {
+                return raiderTeam;
+            }
+        }
         return null;
     }
 
