@@ -89,7 +89,7 @@ public final class Setup {
         nextTimeReminder = -20 * (int)( ((double)Constants.CORE_PLACEMENT_TIME_SECONDS - Mathf.FLOAT_ROUNDING_ERROR) / 20.0 );
 
         for (RaiderTeam team : Gamedata.raiderTeams) {
-            team.mindustryTeam = Team.all[team.id + 7];
+            team.mindustryTeam = Team.all[team.id + Constants.TEAM_STARTING_ID];
             team.stringID = "[#" + team.mindustryTeam.color.toString().substring(0, 6) + "]" + team.id + "[]";
         }
 

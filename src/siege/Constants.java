@@ -14,6 +14,7 @@ import java.util.List;
 
 public final class Constants {
     public static final int RAIDER_MAX_PLAYERS = 3;
+    public static final int TEAM_STARTING_ID = 7;
 
     public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.denseRedStone;
 
