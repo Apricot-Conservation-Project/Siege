@@ -411,41 +411,51 @@ public class RaiderTeam {
          * @param executor The player running the teams command
          */
         private static void teamCommand(String[] args, Player executor){
-            if (args.length == 0) {
-                teamsHelp(executor);
-                return;
-            }
-
-            final List<String> commands = List.of(new String[]{"help", "list", "invite", "join", "quit", "create", "open", "close", "kick", "vote"});
-
-            if (!commands.contains(args[0])) {
-                executor.sendMessage("[red]Invalid command. Try running /team help.");
-                return;
-            }
-
-            if (Gamedata.teamSetupPhase()) {
-                switch (args[0]) {
-                    case "help":     teamsHelp(executor); return;
-                    case "list":     teamsList(executor); return;
-                    case "invite": teamsInvite(executor, args[1]); return;
-                    case "join":     teamsJoin(executor, args[1]); return;
-                    case "quit":     teamsQuit(executor); return;
-                    case "create": teamsCreate(executor); return;
-                    case "open":     teamsOpen(executor); return;
-                    case "close":   teamsClose(executor); return;
-                    case "kick":     teamsKick(executor, args[1]); return;
-                    case "vote":     teamsVote(executor, args[1]); return;
-                    default: System.out.println("Unreachable state. Error code 345374");
+            try {
+                if (args.length == 0) {
+                    teamsHelp(executor);
+                    return;
                 }
-            } else {
-                switch (args[0]) {
-                    case "help":     teamsHelp(executor); return;
-                    case "list":     teamsList(executor); return;
-                    case "quit":     teamsQuit(executor); return;
-                    case "kick":     teamsKick(executor, args[1]); return;
-                    case "vote":     teamsVote(executor, args[1]); return;
-                    default: executor.sendMessage("[red]This subcommand is no longer allowed, as the game has begun. Check /team help for available team commands.");
+                if (args.length == 1) {
+                    // Pass the error down to the command
+                    args = new String[]{args[0], null};
                 }
+
+                final List<String> commands = List.of(new String[]{"help", "list", "invite", "join", "quit", "create", "open", "close", "kick", "vote"});
+
+                if (!commands.contains(args[0])) {
+                    executor.sendMessage("[red]Invalid command. Try running /team help.");
+                    return;
+                }
+
+                if (Gamedata.teamSetupPhase()) {
+                    switch (args[0]) {
+                        case "help":     teamsHelp(executor); return;
+                        case "list":     teamsList(executor); return;
+                        case "invite": teamsInvite(executor, args[1]); return;
+                        case "join":     teamsJoin(executor, args[1]); return;
+                        case "quit":     teamsQuit(executor); return;
+                        case "create": teamsCreate(executor); return;
+                        case "open":     teamsOpen(executor); return;
+                        case "close":   teamsClose(executor); return;
+                        case "kick":     teamsKick(executor, args[1]); return;
+                        case "vote":     teamsVote(executor, args[1]); return;
+                        default: System.out.println("Unreachable state. Error code 345374");
+                    }
+                } else {
+                    switch (args[0]) {
+                        case "help":     teamsHelp(executor); return;
+                        case "list":     teamsList(executor); return;
+                        case "quit":     teamsQuit(executor); return;
+                        case "kick":     teamsKick(executor, args[1]); return;
+                        case "vote":     teamsVote(executor, args[1]); return;
+                        default: executor.sendMessage("[red]This subcommand is no longer allowed, as the game has begun. Check /team help for available team commands.");
+                    }
+                }
+            } catch (Exception e) {
+                    e.printStackTrace();
+                    Gamedata.dataDump();
+                    SiegePlugin.announce("[red]Exception thrown during team command");
             }
         }
 
@@ -551,6 +561,11 @@ public class RaiderTeam {
         // Requests to join, or accepts an invitation to a team
         // Players who are already in a team should be able to request to join (switch) as well, so long as they are in the team setup phase.
         private static void teamsJoin(Player executor, String targetString) {
+            if (targetString == null || targetString.isEmpty()) {
+                executor.sendMessage("[red]You must specify a team or player!");
+                return;
+            }
+
             int id = -1;
             try {
                 id = Integer.parseInt(targetString);
