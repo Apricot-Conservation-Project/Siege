@@ -1,5 +1,6 @@
 package siege;
 
+import arc.struct.Seq;
 import mindustry.gen.Player;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ public class PersistentPlayer {
     public boolean online;
     public long lastSeen;
     public Player currentPlayer;
-    public static List<PersistentPlayer> players = new ArrayList<>();
+    public static Seq<PersistentPlayer> players = new Seq<>();
 
     /**
      * Returns a player's PersistentPlayer if one has already been made, otherwise creates a new instance for the given player.

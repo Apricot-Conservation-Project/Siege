@@ -47,7 +47,9 @@ public class RaiderTeam {
             }
         }
 
-        players = new Seq<>();
+        players = new Seq<>(false);
+        joinRequests = new Seq<>(false);
+        invitations = new Seq<>(false);
         open = false;
         stringID = "[blue]" + id + "[]";
     }

@@ -111,7 +111,7 @@ public final class Utilities {
         StringBuilder sb = new StringBuilder();
         ItemStack[] items = itemSeq.toArray();
         for (int i = 0; i < items.length; i++) {
-            sb.append(items[i].amount + " " + items[i].item.toString());
+            sb.append(items[i].amount).append(" ").append(items[i].item.toString());
             if (i < items.length - 1) {
                 if (items.length == 2) {
                     sb.append(" ");
