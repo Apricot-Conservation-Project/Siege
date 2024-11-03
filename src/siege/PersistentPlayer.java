@@ -49,7 +49,7 @@ public class PersistentPlayer {
      * @return The requested player, or null.
      */
     public static PersistentPlayer fromString(String s, Player executor) {
-        if (s.isEmpty()) {
+        if (s == null || s.isEmpty()) {
             if (executor != null) {
                 executor.sendMessage("[red]You must specify a player!");
             }
