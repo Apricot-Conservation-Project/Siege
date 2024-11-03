@@ -24,10 +24,10 @@ public class PersistentPlayer {
                 persistentPlayer.currentPlayer = targetPlayer;
                 return persistentPlayer;
             }
-            if (persistentPlayer.currentPlayer.ip().equals(targetPlayer.ip())) {
-                persistentPlayer.currentPlayer = targetPlayer;
-                return persistentPlayer;
-            }
+//            if (persistentPlayer.currentPlayer.ip().equals(targetPlayer.ip())) {
+//                persistentPlayer.currentPlayer = targetPlayer;
+//                return persistentPlayer;
+//            }
         }
 
         return new PersistentPlayer(targetPlayer);
