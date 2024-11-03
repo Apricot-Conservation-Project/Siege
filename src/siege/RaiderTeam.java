@@ -33,6 +33,13 @@ public class RaiderTeam {
     public Seq<PersistentPlayer> joinRequests;
     public Seq<PersistentPlayer> invitations;
 
+    protected long votekickEnd = Long.MAX_VALUE;
+    protected PersistentPlayer votekickTarget = null;
+    protected boolean votekickOngoing = false;
+    protected Seq<PersistentPlayer> yesVoters;
+    protected Seq<PersistentPlayer> noVoters;
+    protected Seq<PersistentPlayer> abstainVoters;
+
     public RaiderTeam() {
         id = 0;
         boolean collision = true;
@@ -50,6 +57,9 @@ public class RaiderTeam {
         players = new Seq<>(false);
         joinRequests = new Seq<>(false);
         invitations = new Seq<>(false);
+        yesVoters = new Seq<>(false);
+        noVoters = new Seq<>(false);
+        abstainVoters = new Seq<>(false);
         open = false;
         stringID = "[blue]" + id + "[]";
     }
@@ -57,6 +67,36 @@ public class RaiderTeam {
     public RaiderTeam(Player initialPlayer) {
         this();
         players.add(PersistentPlayer.fromPlayer(initialPlayer));
+    }
+
+    /**
+     * Performs time-based actions for the team. Should only be called after the game has started.
+     */
+    public void update() {
+        updateVotekick();
+    }
+
+    private void updateVotekick() {
+        int yeses = yesVoters.size;
+        int nos = noVoters.size;
+        int abstains = abstainVoters.size;
+        int totalPlayers = players.size;
+        int nonvoters = totalPlayers - (yeses + nos + abstains);
+        // Judge by yeses and nos only if the votekick ends by time
+        if (System.currentTimeMillis() > votekickEnd) {
+            if (yeses > nos) {
+                votekickPasses();
+            } else {
+                votekickFails();
+            }
+        }
+        // End early if it is not possible for nos to overtake yeses or vice versa
+        else if (yesVoters.size > nos + nonvoters) {
+            votekickPasses();
+        }
+        else if (noVoters.size > yeses + nonvoters) {
+            votekickFails();
+        }
     }
 
     /**
@@ -249,6 +289,75 @@ public class RaiderTeam {
         }
     }
 
+    private void votekickPasses() {
+        announceTeam("[blue]Votekick passed. " + votekickTarget.currentPlayer.name() + "[blue] has been kicked from the team and returned to the Citadel.");
+        players.remove(votekickTarget);
+        CoreBlock.playerSpawn(Team.green.cores().random().tile, votekickTarget.currentPlayer);
+        votekickClear();
+    }
+
+    private void votekickFails() {
+        announceTeam("[blue]Votekick failed. " + votekickTarget.currentPlayer.name() + "[blue] will remain in the team.");
+        votekickClear();
+    }
+
+    private void votekickClear() {
+        votekickEnd = Long.MAX_VALUE;
+        votekickTarget = null;
+        votekickOngoing = false;
+        yesVoters.clear();
+        noVoters.clear();
+        abstainVoters.clear();
+    }
+
+    /**
+     * Sends a message to all team members.
+     * @param message The message to send to the team members
+     */
+    public void announceTeam(String message) {
+        for (PersistentPlayer persistentPlayer : players) {
+            if (persistentPlayer.online) {
+                persistentPlayer.currentPlayer.sendMessage(message);
+            }
+        }
+    }
+
+    /**
+     * Sends a message to all team members but those excluded.
+     * @param message The message to send to the team members
+     * @param excluded The players that will not receive the message
+     */
+    public void announceTeam(String message, PersistentPlayer... excluded) {
+        playerLoop: for (PersistentPlayer persistentPlayer : players) {
+            for (PersistentPlayer excludedPlayer : excluded) {
+                if (persistentPlayer.equals(excludedPlayer)) {
+                    continue playerLoop;
+                }
+            }
+            if (persistentPlayer.online) {
+                persistentPlayer.currentPlayer.sendMessage(message);
+            }
+        }
+    }
+
+    /**
+     * Sends a message to all team members but those excluded.
+     * @param message The message to send to the team members
+     * @param excluded The players that will not receive the message
+     */
+    public void announceTeam(String message, Player... excluded) {
+        playerLoop: for (PersistentPlayer persistentPlayer : players) {
+            for (Player excludedPlayer : excluded) {
+                if (persistentPlayer.currentPlayer.equals(excludedPlayer)) {
+                    continue playerLoop;
+                }
+            }
+            if (persistentPlayer.online) {
+                persistentPlayer.currentPlayer.sendMessage(message);
+            }
+        }
+    }
+
 
 
     /**
@@ -307,7 +416,7 @@ public class RaiderTeam {
                 return;
             }
 
-            final List<String> commands = List.of(new String[]{"help", "list", "invite", "join", "quit", "create", "open", "close", "kick"});
+            final List<String> commands = List.of(new String[]{"help", "list", "invite", "join", "quit", "create", "open", "close", "kick", "vote"});
 
             if (!commands.contains(args[0])) {
                 executor.sendMessage("[red]Invalid command. Try running /team help.");
@@ -325,6 +434,7 @@ public class RaiderTeam {
                     case "open":     teamsOpen(executor); return;
                     case "close":   teamsClose(executor); return;
                     case "kick":     teamsKick(executor, args[1]); return;
+                    case "vote":     teamsVote(executor, args[1]); return;
                     default: System.out.println("Unreachable state. Error code 345374");
                 }
             } else {
@@ -333,6 +443,7 @@ public class RaiderTeam {
                     case "list":     teamsList(executor); return;
                     case "quit":     teamsQuit(executor); return;
                     case "kick":     teamsKick(executor, args[1]); return;
+                    case "vote":     teamsVote(executor, args[1]); return;
                     default: executor.sendMessage("[red]This subcommand is no longer allowed, as the game has begun. Check /team help for available team commands.");
                 }
             }
@@ -345,7 +456,8 @@ public class RaiderTeam {
                 output =
                         "\n[orange]team list[white]: List all current Raider teams." +
                         "\n[orange]team quit[white]: Quit your team and return to the Citadel team. You may attempt to join a new team afterward." +
-                        "\n[orange]team kick [yellow]<player name/ID>[white]: Start a vote to remove a player from your team.\n";
+                        "\n[orange]team kick [yellow]<player name/ID>[white]: Start a vote to remove a player from your team." +
+                        "\n[orange]team vote [yellow]<yes/no/abstain>[white]: Vote whether or not to kick a player.\n";
             } else {
                 output =
                         "\n[accent]Currently in team setup phase." +
@@ -356,7 +468,8 @@ public class RaiderTeam {
                         "\n[orange]team create[white]: Create a new team." +
                         "\n[orange]team open[white]: Allow any player to join your team without approval." +
                         "\n[orange]team close[white]: Cease allowing players to join your team without approval." +
-                        "\n[orange]team kick [yellow]<player name/ID>[white]: Start a vote to remove a player from your team.\n";
+                        "\n[orange]team kick [yellow]<player name/ID>[white]: Start a vote to remove a player from your team." +
+                        "\n[orange]team vote [yellow]<yes/no/abstain>[white]: Vote whether or not to kick a player.\n";
             }
 
             executor.sendMessage(output);
@@ -478,9 +591,7 @@ public class RaiderTeam {
                 }
                 team.invitations.remove(persistentExecutor);
                 team.players.add(persistentExecutor);
-                for (PersistentPlayer player : team.players) {
-                    player.currentPlayer.sendMessage(executor.name + " [accent] has joined the team.");
-                }
+                team.announceTeam(executor.name + "[accent] has joined the team.", persistentExecutor);
                 executor.sendMessage("[accent]Joined team " + team.stringID + ".");
                 return;
             }
@@ -550,9 +661,124 @@ public class RaiderTeam {
         }
 
         // Starts a vote to kick a player from the team.
-        private static void teamsKick(Player executor, String targetPlayer) {
-            // Start a vote to kick the target player from your team
-            // TODO
+        private static void teamsKick(Player executor, String targetString) {
+            RaiderTeam team = getTeam(PersistentPlayer.fromPlayer(executor));
+
+            if (team == null) {
+                executor.sendMessage("[red]You are not currently in a team!");
+                return;
+            }
+
+            PersistentPlayer targetPlayer = PersistentPlayer.fromString(targetString, executor);
+            if (targetPlayer == null) {
+                return; // Error messages already sent
+            }
+            if (PersistentPlayer.fromPlayer(executor).equals(targetPlayer)) {
+                executor.sendMessage("[orange]You cannot votekick yourself! Use /team quit instead.");
+                return;
+            }
+            if (team.votekickOngoing) {
+                if (team.votekickTarget.equals(targetPlayer)) {
+                    executor.sendMessage("[orange]The target player is already in a votekick.");
+                } else {
+                    executor.sendMessage("[red]A votekick is already underway for a different player. You must wait until it is complete.");
+                }
+                return;
+            }
+
+            int votekickTime;
+            if (Gamedata.gameStarted) {
+                votekickTime = Constants.VOTEKICK_LENGTH_MS;
+            } else {
+                votekickTime = Constants.VOTEKICK_LENGTH_PREGAME_MS;
+            }
+            team.votekickTarget = targetPlayer;
+            team.votekickEnd = System.currentTimeMillis() + votekickTime;
+            executor.sendMessage("[accent]Started vote to kick " + targetPlayer.currentPlayer.name + "[accent] from the team. You have " + (votekickTime / 1000) + " seconds to vote.");
+            team.announceTeam("[accent]A vote has been started to kick " + targetPlayer.currentPlayer.name + "[accent] from the team. You have " + (votekickTime / 1000) + " seconds to vote.", executor);
+        }
+
+        // Votes in a votekick
+        private static void teamsVote(Player executor, String voteString) {
+            PersistentPlayer persistentExecutor = PersistentPlayer.fromPlayer(executor);
+            RaiderTeam team = getTeam(persistentExecutor);
+
+            if (team == null) {
+                executor.sendMessage("[red]You are not currently in a team!");
+                return;
+            }
+
+            if (!team.votekickOngoing) {
+                executor.sendMessage("[orange]There is currently no ongoing team votekick.");
+                return;
+            }
+
+            enum Vote {
+                Yes, No, Abstain
+            }
+            Vote vote = switch (voteString.toLowerCase().charAt(0)) {
+                case 'y' -> Vote.Yes;
+                case 'n' -> Vote.No;
+                case 'a' -> Vote.Abstain;
+                default -> null;
+            };
+            if (vote == null) {
+                executor.sendMessage("[red]You can vote Yes (y), No (n), or Abstain (a).");
+                return;
+            }
+
+            if (team.yesVoters.contains(persistentExecutor)) {
+                if (vote == Vote.Yes) {
+                    executor.sendMessage("[orange]You have already voted yes.");
+                }
+                else if (vote == Vote.No) {
+                    executor.sendMessage("[accent]Your vote has been changed to no.");
+                    team.yesVoters.remove(persistentExecutor);
+                    team.noVoters.add(persistentExecutor);
+                } else {
+                    executor.sendMessage("[accent]Your vote has been changed to abstain.");
+                    team.yesVoters.remove(persistentExecutor);
+                    team.abstainVoters.add(persistentExecutor);
+                }
+            }
+            else if (team.noVoters.contains(persistentExecutor)) {
+                if (vote == Vote.Yes) {
+                    executor.sendMessage("[accent]Your vote has been changed to yes.");
+                    team.noVoters.remove(persistentExecutor);
+                    team.yesVoters.add(persistentExecutor);
+                } else if (vote == Vote.No) {
+                    executor.sendMessage("[orange]You have already voted no.");
+                } else {
+                    executor.sendMessage("[accent]Your vote has been changed to abstain.");
+                    team.noVoters.remove(persistentExecutor);
+                    team.abstainVoters.add(persistentExecutor);
+                }
+            }
+            else if (team.abstainVoters.contains(persistentExecutor)) {
+                if (vote == Vote.Yes) {
+                    executor.sendMessage("[accent]Your vote has been changed to yes.");
+                    team.abstainVoters.remove(persistentExecutor);
+                    team.yesVoters.add(persistentExecutor);
+                } else if (vote == Vote.No) {
+                    executor.sendMessage("[accent]Your vote has been changed to no.");
+                    team.abstainVoters.remove(persistentExecutor);
+                    team.noVoters.add(persistentExecutor);
+                } else {
+                    executor.sendMessage("[orange]You have already voted to abstain.");
+                }
+            }
+            else {
+                if (vote == Vote.Yes) {
+                    executor.sendMessage("[accent]You have voted yes.");
+                    team.yesVoters.add(persistentExecutor);
+                } else if (vote == Vote.No) {
+                    executor.sendMessage("[orange]You have voted no.");
+                    team.noVoters.add(persistentExecutor);
+                } else {
+                    executor.sendMessage("[accent]You have voted to abstain.");
+                    team.abstainVoters.add(persistentExecutor);
+                }
+            }
         }
     }
 }

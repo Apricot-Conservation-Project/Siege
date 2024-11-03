@@ -71,6 +71,9 @@ public final class Constants {
     public static final int CORE_PLACEMENT_TIME_SECONDS = 60;
     public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
 
+    public static final int VOTEKICK_LENGTH_PREGAME_MS = 30 * 1000;
+    public static final int VOTEKICK_LENGTH_MS = 90 * 1000;
+
     public static final ItemSeq RAIDER_LOADOUT = new ItemSeq(ItemStack.list(
             Items.copper, 3600,
             Items.lead, 3600,
