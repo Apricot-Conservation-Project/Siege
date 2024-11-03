@@ -110,7 +110,7 @@ public class RaiderTeam {
         for (PersistentPlayer player : players) {
             if (player.online) {
                 // x, y = 8 * tileX, tileY
-                points.add(new Point2D.Float(player.currentPlayer.x / tilesize, player.currentPlayer.tileOn().worldy() / tilesize));
+                points.add(new Point2D.Float(player.currentPlayer.x / tilesize, player.currentPlayer.y / tilesize));
             }
         }
 
