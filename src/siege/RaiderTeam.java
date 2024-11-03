@@ -2,6 +2,7 @@ package siege;
 
 import arc.math.Mathf;
 import arc.math.geom.Point2;
+import arc.struct.Seq;
 import arc.util.CommandHandler;
 import arc.util.Time;
 import mindustry.game.Team;
@@ -22,15 +23,15 @@ import static siege.Utilities.geometricMedian;
 public class RaiderTeam {
     public int id;
     public String stringID;
-    public List<PersistentPlayer> players;
+    public Seq<PersistentPlayer> players;
     public boolean open;
 
     // Should have no value until team setup ends
     public Team mindustryTeam;
 
     // Should be inaccessible after setup concludes.
-    public List<PersistentPlayer> joinRequests;
-    public List<PersistentPlayer> invitations;
+    public Seq<PersistentPlayer> joinRequests;
+    public Seq<PersistentPlayer> invitations;
 
     public RaiderTeam() {
         id = 0;
@@ -46,7 +47,7 @@ public class RaiderTeam {
             }
         }
 
-        players = new ArrayList<>();
+        players = new Seq<>();
         open = false;
         stringID = "[blue]" + id + "[]";
     }
@@ -409,7 +410,7 @@ public class RaiderTeam {
 
             // Invitation is immediately accepted
             if (team.joinRequests.contains(targetPlayer)) {
-                if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
+                if (team.players.size >= Constants.RAIDER_MAX_PLAYERS) {
                     executor.sendMessage("[accent]Your invitation would be accepted, however, your team is already full. In order for another player to join, one of yours must leave.");
                     return;
                 }
@@ -423,7 +424,7 @@ public class RaiderTeam {
             }
 
             // Invitation is sent, to be accepted or ignored by the recipient
-            if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
+            if (team.players.size >= Constants.RAIDER_MAX_PLAYERS) {
                 executor.sendMessage("[accent]Your invitation has been sent, however, your team is already full. In order for another player to join, one of yours must leave.");
             }
             for (PersistentPlayer player : team.players) {
@@ -469,7 +470,7 @@ public class RaiderTeam {
 
             // Join request is instantly accepted
             if (team.open || team.invitations.contains(persistentExecutor)) {
-                if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
+                if (team.players.size >= Constants.RAIDER_MAX_PLAYERS) {
                     executor.sendMessage("[accent]Your join request would be accepted, however, team " + team.stringID + " is already full. You might want to consider creating or joining another team.");
                     return;
                 }
@@ -483,7 +484,7 @@ public class RaiderTeam {
             }
 
             // Join request is sent to be accepted or ignored by the recipient
-            if (team.players.size() >= Constants.RAIDER_MAX_PLAYERS) {
+            if (team.players.size >= Constants.RAIDER_MAX_PLAYERS) {
                 executor.sendMessage("[accent]Your join request was placed, but keep in mind that the team is already full. If another player leaves, they may accept you, but consider creating or joining another team.");
             }
             for (PersistentPlayer player : team.players) {
