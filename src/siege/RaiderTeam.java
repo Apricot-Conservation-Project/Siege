@@ -578,8 +578,6 @@ public class RaiderTeam {
                 }
             }
 
-            PersistentPlayer persistentExecutor = PersistentPlayer.fromPlayer(executor);
-
             if (team == null) {
                 PersistentPlayer targetPlayer = PersistentPlayer.fromString(targetString, executor);
                 if (targetPlayer == null) {
@@ -591,6 +589,13 @@ public class RaiderTeam {
                     executor.sendMessage("[red]Player [accent]" + targetPlayer.currentPlayer.name + "[red] is not in a team.");
                     return;
                 }
+            }
+
+            PersistentPlayer persistentExecutor = PersistentPlayer.fromPlayer(executor);
+
+            if (team.players.contains(persistentExecutor)) {
+                executor.sendMessage("[red]You are already in this team!");
+                return;
             }
 
             if (team.joinRequests.contains(persistentExecutor)) {
