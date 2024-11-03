@@ -49,6 +49,13 @@ public class PersistentPlayer {
      * @return The requested player, or null.
      */
     public static PersistentPlayer fromString(String s, Player executor) {
+        if (s.isEmpty()) {
+            if (executor != null) {
+                executor.sendMessage("[red]You must specify a player!");
+            }
+            return null;
+        }
+
         // Try to find player by ID, continue if s is invalid ID or if none are found.
         try {
             for (PersistentPlayer persistentPlayer : players) {
