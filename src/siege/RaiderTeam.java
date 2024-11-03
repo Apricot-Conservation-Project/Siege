@@ -124,6 +124,7 @@ public class RaiderTeam {
         final float coreCitadelDistance2 = Mathf.sqr(Constants.CORE_PLACEMENT_CITADEL_MIN_DISTANCE);
         CoreBlock.CoreBuild[] cores = Gamedata.getAllCores();
 
+        boolean coreAdjusted = false;
         // If within core no-core radius, leave core no-core radius.
         for (CoreBlock.CoreBuild core : cores) {
             float radius = Constants.CORE_PLACEMENT_MIN_DISTANCE;
@@ -137,8 +138,9 @@ public class RaiderTeam {
                 int dx = adjustedCorePosition.x - core.tileX();
                 int dy = adjustedCorePosition.y - core.tileY();
                 float currentDistance = Mathf.sqrt(dx * dx + dy * dy);
-                float distanceScale = radius / currentDistance;
+                float distanceScale = (radius - 5) / currentDistance;
                 adjustedCorePosition = new Point2((int) (core.tileX() + distanceScale * dx), (int) (core.tileY() + distanceScale * dy));
+                coreAdjusted = true;
             }
         }
 
@@ -215,7 +217,7 @@ public class RaiderTeam {
             radius ++;
         }
 
-        return new Utilities.Tuple<>(closestCorable, /*cycles > 1 || */radius != 0);
+        return new Utilities.Tuple<>(closestCorable, coreAdjusted || radius != 0);
     }
 
     /**
