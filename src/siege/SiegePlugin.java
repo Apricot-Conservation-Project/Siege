@@ -63,6 +63,12 @@ public final class SiegePlugin extends Plugin {
             }
         });
 
+        Events.on(EventType.BlockBuildEndEvent.class, event -> {
+            if (event.tile.build.block instanceof CoreBlock) {
+                Gamedata.reloadCore((CoreBlock.CoreBuild) event.tile.build);
+            }
+        });
+
         Events.on(EventType.TapEvent.class, event -> {
             if (event.tile.build != null && event.tile.build.block == Blocks.vault) {
                 attemptCore(event.tile.build, event.player);
@@ -101,7 +107,7 @@ public final class SiegePlugin extends Plugin {
             }
         }
 
-        Gamedata.reloadCore((CoreBlock.CoreBuild) core);
+        Time.run(20f, () -> Gamedata.reloadCore((CoreBlock.CoreBuild) core));
     }
 
     /**
