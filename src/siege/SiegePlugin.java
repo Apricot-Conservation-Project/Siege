@@ -17,6 +17,7 @@ import mindustry.world.Block;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.modules.ItemModule;
 
+import static mindustry.Vars.state;
 import static mindustry.Vars.world;
 
 public final class SiegePlugin extends Plugin {
@@ -27,6 +28,7 @@ public final class SiegePlugin extends Plugin {
 
         Gamedata.reset();
         Setup.reset();
+        RuleSetter.initRules();
 
         Events.run(EventType.Trigger.update, SiegePlugin::update);
 
@@ -34,6 +36,7 @@ public final class SiegePlugin extends Plugin {
             System.out.println("ResetEvent Reset");
             Gamedata.reset();
             Setup.reset();
+            RuleSetter.initRules();
         });
 
         Events.on(EventType.PlayerConnect.class, event -> {
@@ -78,6 +81,8 @@ public final class SiegePlugin extends Plugin {
 
     private static void update() {
         try {
+            RuleSetter.update();
+
             if (!Gamedata.gameOver) {
                 alwaysUpdate();
 
@@ -183,12 +188,18 @@ public final class SiegePlugin extends Plugin {
 
         if (winner == 0) {
             announce("[accent]The [green]Citadel[] has won the game!");
+            state.rules.canGameOver = true;
+            Time.run(60f, () -> {state.rules.canGameOver = false;});
         } else if (winner == -1) {
             announce("[accent]Game ended without a winner.");
+            state.rules.canGameOver = true;
+            Time.run(60f, () -> {state.rules.canGameOver = false;});
         } else {
             for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.id == winner) {
                     announce("[accent]Team " + team.stringID + " has won the game!");
+                    state.rules.canGameOver = true;
+                    Time.run(60f, () -> {state.rules.canGameOver = false;});
                     break;
                 }
             }
