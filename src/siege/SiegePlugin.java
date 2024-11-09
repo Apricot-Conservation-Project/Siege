@@ -187,14 +187,34 @@ public final class SiegePlugin extends Plugin {
             divisor += 1.0f / Math.sqrt(dist2);
         }
         double harmonicFactor = Mathf.pow((float)cores.size, Constants.HARMONIC_CORE_COUNT_POWER_FACTOR) / divisor;
+
+        // Guarantee harmonic factor
+        // See: Constants.GUARANTEED_HARMONIC_FACTOR
+        ItemSeq guaranteedPrice = globalPrice.copy(); // GlobalPrice at this point is just constant and per-core price
+        guaranteedPrice.add(Utilities.multiplyItemSeq(Constants.HARMONIC_DISTANCE_CORE_PRICE, Constants.GUARANTEED_HARMONIC_FACTOR));
+        int byItemStorage = cores.size * Blocks.coreShard.itemCapacity;
+        ItemSeq subtraction = new ItemSeq();
+        for (ItemStack items : guaranteedPrice) {
+            if (items.amount > byItemStorage) {
+                subtraction.add( new ItemStack(items.item, -(items.amount - byItemStorage) ));
+            }
+        }
+
         globalPrice.add(Utilities.multiplyItemSeq(Constants.HARMONIC_DISTANCE_CORE_PRICE, harmonicFactor));
-        // Can the team afford the price?
+        globalPrice.add(subtraction);
+        ItemSeq adjustedGlobalPrice = new ItemSeq();
         for (ItemStack items : globalPrice) {
+            if (items.amount >= Constants.MINIMUM_CORE_PRICE_ITEMS) {
+                adjustedGlobalPrice.add(items);
+            }
+        }
+        // Can the team afford the price?
+        for (ItemStack items : adjustedGlobalPrice) {
             if (!team.items().has(items.item, items.amount)) {
                 // Does not have enough.
                 if (executor != null) {
                     ItemSeq remaining = new ItemSeq();
-                    for (ItemStack itemStack : globalPrice) {
+                    for (ItemStack itemStack : adjustedGlobalPrice) {
                         if (!team.items().has(itemStack.item, itemStack.amount)) {
                             remaining.add(new ItemStack(itemStack.item, itemStack.amount - team.items().get(itemStack.item)));
                         }
@@ -204,7 +224,7 @@ public final class SiegePlugin extends Plugin {
                 return false;
             }
         }
-        coreContents.remove(globalPrice);
+        coreContents.remove(adjustedGlobalPrice);
         team.items().set(coreContents);
 
         final Block core = Blocks.coreShard;

@@ -49,6 +49,13 @@ public final class Constants {
             UnitTypes.gamma,
     });
 
+    // Item prices lower than this should be discarded.
+    public static final int MINIMUM_CORE_PRICE_ITEMS = 500;
+    // The factor of the harmonic core price for which it is guaranteed that a full core can pay it
+    // At harmonic factors above this it may be necessary to build closer cores or expand storage before building the desired core.
+    // For every core, the price will be simulated for if the harmonic factor was at this value, and any prices exceeding that which could be stored if all current cores were shards will be subtracted down to that value, and that subtraction applies to the final amount.
+    public static final float GUARANTEED_HARMONIC_FACTOR = 15f;
+
     // Must be charged from the vault
     public static final ItemSeq CONSTANT_CORE_PRICE_LOCAL = new ItemSeq(ItemStack.list(
             Items.thorium, 1000,
@@ -69,7 +76,9 @@ public final class Constants {
             Items.plastanium, 200,
             Items.thorium, 500,
             Items.phaseFabric, 1000,
-            Items.silicon, 1000
+            Items.silicon, 1000,
+            Items.copper, 500,
+            Items.lead, 100
     ));
 
     // Black magic
