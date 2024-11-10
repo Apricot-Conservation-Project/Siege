@@ -170,8 +170,10 @@ public final class SiegePlugin extends Plugin {
             }
         }
         // Spend local price and add remaining contents to core
-        vaultContents.remove(Constants.CONSTANT_CORE_PRICE_LOCAL);
-        coreContents.add(vaultContents);
+        if (!vault.items.equals(coreContents)) {
+            vaultContents.remove(Constants.CONSTANT_CORE_PRICE_LOCAL);
+            coreContents.add(vaultContents);
+        }
         // Find total core-consuming price
         Seq<CoreBlock.CoreBuild> cores = team.cores();
         ItemSeq globalPrice = Constants.CONSTANT_CORE_PRICE_GLOBAL.copy();
