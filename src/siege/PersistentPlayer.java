@@ -1,7 +1,9 @@
 package siege;
 
 import arc.struct.Seq;
+import mindustry.game.Team;
 import mindustry.gen.Player;
+import mindustry.world.blocks.storage.CoreBlock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,17 @@ public class PersistentPlayer {
         currentPlayer = p;
         online = true;
         players.add(this);
+    }
+
+    /**
+     * Kills the player and respawns at a desired team's core
+     * @param spawnTeam The team of the core that will be spawned at
+     */
+    public void spawn(Team spawnTeam) {
+        if (!currentPlayer.dead()) {
+            currentPlayer.unit().kill();
+        }
+        CoreBlock.playerSpawn(spawnTeam.cores().random().tile, currentPlayer);
     }
 
     /**

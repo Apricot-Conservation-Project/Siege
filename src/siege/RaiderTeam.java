@@ -259,12 +259,8 @@ public class RaiderTeam {
         // Put all players into Citadel team
         for (PersistentPlayer player : players) {
             if (player.online) {
-                if (player.currentPlayer.team() != Team.green) {
-                    player.currentPlayer.team(Team.green);
-                }
-                if (player.currentPlayer.dead()) {
-                    CoreBlock.playerSpawn(Team.green.cores().random().tile, player.currentPlayer);
-                }
+                player.currentPlayer.team(Team.green);
+                player.spawn(Team.green);
             }
         }
     }
@@ -280,9 +276,7 @@ public class RaiderTeam {
                 player.sendMessage("[orange]Team " + stringID + " has been disqualified for failure to accomplish a fundamental game action.");
             } else {
                 player.team(Team.green);
-                if (player.dead()) {
-                    CoreBlock.playerSpawn(Team.green.cores().random().tile, player);
-                }
+                persistentPlayer.spawn(Team.green);
             }
         }
 
@@ -311,7 +305,8 @@ public class RaiderTeam {
     private void votekickPasses() {
         announceTeam("[blue]Votekick passed. " + votekickTarget.currentPlayer.name() + "[blue] has been kicked from the team and returned to the Citadel.");
         players.remove(votekickTarget);
-        CoreBlock.playerSpawn(Team.green.cores().random().tile, votekickTarget.currentPlayer);
+        votekickTarget.currentPlayer.team(Team.green);
+        votekickTarget.spawn(Team.green);
         votekickClear();
     }
 
