@@ -304,11 +304,20 @@ public final class SiegePlugin extends Plugin {
         }
     }
 
+    private static long previousDeadZoneCheck = 0L;
     // Inflicts a tick of dead zone damage to all units within it
     private static void deadZoneDamage() {
+        if (previousDeadZoneCheck == 0L) {
+            previousDeadZoneCheck = System.currentTimeMillis() - (1000 / 60);
+        }
+        previousDeadZoneCheck = System.currentTimeMillis();
+        float elapsedTimeSeconds = (System.currentTimeMillis() - previousDeadZoneCheck) / 1000f;
+        float elapsedTimeTicks = elapsedTimeSeconds * 60f;
+        float constantDamage = Constants.DEAD_ZONE_DAMAGE_CONSTANT_TICK * elapsedTimeTicks;
+        float percentDamage = Constants.DEAD_ZONE_DAMAGE_PERCENT_TICK * elapsedTimeTicks;
         for (Unit unit : Groups.unit) {
             if (DeadZone.getDeadZone(unit.tileOn())  &&  !Constants.DEAD_ZONE_IMMUNE_TYPES.contains(unit.type)) {
-                unit.health -= Constants.DEAD_ZONE_DAMAGE_CONSTANT_TICK + unit.maxHealth * Constants.DEAD_ZONE_DAMAGE_PERCENT_TICK;
+                unit.health -= constantDamage + unit.maxHealth * percentDamage;
                 if (unit.health <= 0.0f && !unit.dead) {
                     unit.kill();
                 }
