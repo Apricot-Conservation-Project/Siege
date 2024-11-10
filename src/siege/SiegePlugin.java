@@ -246,17 +246,17 @@ public final class SiegePlugin extends Plugin {
         if (winner == 0) {
             announce("[accent]The [green]Citadel[] has won the game!");
             state.rules.canGameOver = true;
-            Time.run(60f, () -> {state.rules.canGameOver = false;});
+            //Time.run(60f, () -> {state.rules.canGameOver = false;});
         } else if (winner == -1) {
             announce("[accent]Game ended without a winner.");
             state.rules.canGameOver = true;
-            Time.run(60f, () -> {state.rules.canGameOver = false;});
+            //Time.run(60f, () -> {state.rules.canGameOver = false;});
         } else {
             for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.id == winner) {
                     announce("[accent]Team " + team.stringID + " has won the game!");
                     state.rules.canGameOver = true;
-                    Time.run(60f, () -> {state.rules.canGameOver = false;});
+                    //Time.run(60f, () -> {state.rules.canGameOver = false;});
                     break;
                 }
             }

@@ -48,10 +48,11 @@ public final class RuleSetter {
      * Initializes the base Siege rules
      */
     public static void initRules() {
+        System.out.println("Rules pushed");
         rules.modeName = "Siege";
 
         rules.enemyCoreBuildRadius = 8 * (Constants.NUCLEUS_DEAD_ZONE_RADIUS + EXTRA_NO_BUILD_RADIUS);
-        rules.canGameOver = false;
+        //rules.canGameOver = false;
         // rules.playerDamageMultiplier = 0;
         rules.buildSpeedMultiplier = BUILD_SPEED_MULTIPLIER;
         rules.coreIncinerates = true;
