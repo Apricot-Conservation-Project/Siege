@@ -93,7 +93,7 @@ public final class Setup {
             team.stringID = "[#" + team.mindustryTeam.color.toString().substring(0, 6) + "]" + team.id + "[]";
         }
 
-        Gamedata.initCache();
+        DeadZone.initCache();
     }
 
     /**
@@ -159,9 +159,9 @@ public final class Setup {
         long beginTime = System.currentTimeMillis();
         CoreBlock.CoreBuild[] cores = Gamedata.getAllCores();
         for (CoreBlock.CoreBuild core : cores) {
-            Gamedata.reloadCore(core);
+            DeadZone.reloadCore(core);
         }
-        Gamedata.reloadFloor();
+        DeadZone.reloadFloor();
         long endTime = System.currentTimeMillis();
         int elapsed = (int) (endTime - beginTime);
         System.out.println(elapsed + " ms to generate and write floor (" + (elapsed / (1000f / 60f)) + " ticks at 60TPS)");

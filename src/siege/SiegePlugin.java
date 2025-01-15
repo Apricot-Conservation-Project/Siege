@@ -14,6 +14,7 @@ import mindustry.mod.*;
 import mindustry.type.ItemSeq;
 import mindustry.type.ItemStack;
 import mindustry.world.Block;
+import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.modules.ItemModule;
 
@@ -22,6 +23,10 @@ import static mindustry.Vars.world;
 
 public final class SiegePlugin extends Plugin {
 
+    /**
+     * Initialize the plugin - Runs as soon as the mod loads
+     * Sets up events and rules
+     */
     @Override
     public void init() {
         System.out.println("SiegePlugin loaded");
@@ -60,7 +65,7 @@ public final class SiegePlugin extends Plugin {
         });
 
         Events.on(EventType.BuildSelectEvent.class, event -> {
-            if (!Gamedata.gameStarted || (!event.breaking && Gamedata.getDeadZone(new Point2(event.tile.x, event.tile.y)))) {
+            if (!Gamedata.gameStarted || (!event.breaking && DeadZone.getDeadZone(new Point2(event.tile.x, event.tile.y)))) {
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
             }
@@ -68,7 +73,7 @@ public final class SiegePlugin extends Plugin {
 
         Events.on(EventType.BlockBuildEndEvent.class, event -> {
             if (event.tile.build.block instanceof CoreBlock) {
-                Gamedata.reloadCore((CoreBlock.CoreBuild) event.tile.build);
+                DeadZone.reloadCore((CoreBlock.CoreBuild) event.tile.build);
             }
         });
 
@@ -79,6 +84,10 @@ public final class SiegePlugin extends Plugin {
         });
     }
 
+    /**
+     * Manages all tick updates
+     * Delegates to sub-functions for various game stages
+     */
     private static void update() {
         try {
             RuleSetter.update();
@@ -112,7 +121,7 @@ public final class SiegePlugin extends Plugin {
             }
         }
 
-        Time.run(20f, () -> Gamedata.reloadCore((CoreBlock.CoreBuild) core));
+        Time.run(20f, () -> DeadZone.reloadCore((CoreBlock.CoreBuild) core));
     }
 
     /**
@@ -174,7 +183,7 @@ public final class SiegePlugin extends Plugin {
 
         final Block core = Blocks.coreShard;
         vault.tile.setNet(core, team, 0);
-        Gamedata.reloadCore((CoreBlock.CoreBuild) vault.tile.build);
+        DeadZone.reloadCore((CoreBlock.CoreBuild) vault.tile.build);
 
         return true;
     }
@@ -213,6 +222,10 @@ public final class SiegePlugin extends Plugin {
         });
     }
 
+    /**
+     * Sends a welcome message to the specified player.
+     * @param player The player to welcome
+     */
     private static void joinMessage(Player player) {
         if (RaiderTeam.getTeam(PersistentPlayer.fromPlayer(player)) != null) {
             return;
@@ -236,9 +249,10 @@ public final class SiegePlugin extends Plugin {
         deadZoneDamage();
     }
 
+    // Inflicts a tick of dead zone damage to all units within it
     private static void deadZoneDamage() {
         for (Unit unit : Groups.unit) {
-            if (Gamedata.getDeadZone(unit.tileOn())  &&  !Constants.DEAD_ZONE_IMMUNE_TYPES.contains(unit.type)) {
+            if (DeadZone.getDeadZone(unit.tileOn())  &&  !Constants.DEAD_ZONE_IMMUNE_TYPES.contains(unit.type)) {
                 unit.health -= Constants.DEAD_ZONE_DAMAGE_CONSTANT_TICK + unit.maxHealth * Constants.DEAD_ZONE_DAMAGE_PERCENT_TICK;
                 if (unit.health <= 0.0f && !unit.dead) {
                     unit.kill();
@@ -247,6 +261,7 @@ public final class SiegePlugin extends Plugin {
         }
     }
 
+    // Verifies teams contain players and sets player teams to the correct values
     private static void checkTeams() {
         Gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
 
@@ -329,6 +344,12 @@ public final class SiegePlugin extends Plugin {
                     Items.blastCompound, 10000,
                     Items.pyratite, 10000
             )));
+        });
+        handler.<Player>register("core", "place a core at your location", (args, player) -> {
+            Team team = player.team();
+            Tile tile = world.tile(player.tileX(), player.tileY());
+            tile.setNet(Blocks.coreShard, team, 0);
+            DeadZone.reloadCore((CoreBlock.CoreBuild) tile.build);
         });
     }
 

@@ -29,6 +29,7 @@ public final class Constants {
     public static final float NUCLEUS_DEAD_ZONE_RADIUS = 50f;
 
     public static final int GUARANTEED_KEEP_TIME_SECONDS = 10 * 60;
+    public static final int KEEP_RADIUS = 30;
     // Fx to indicate keep borders
     public static final float DEAD_ZONE_DAMAGE_CONSTANT_TICK = 55f / 60f; // Absolute damage every tick
     public static final float DEAD_ZONE_DAMAGE_PERCENT_TICK = 0.018f / 60f; // Percent of max health every tick
@@ -69,8 +70,8 @@ public final class Constants {
             Items.surgeAlloy, 150
     ));
 
-    public static final int TEAM_SETUP_TIME_SECONDS = 120;
-    public static final int CORE_PLACEMENT_TIME_SECONDS = 60;
+    public static final int TEAM_SETUP_TIME_SECONDS = 20;
+    public static final int CORE_PLACEMENT_TIME_SECONDS = 10;
     public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
 
     public static final int VOTEKICK_LENGTH_PREGAME_MS = 30 * 1000;
