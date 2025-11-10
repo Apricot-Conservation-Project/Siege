@@ -6,6 +6,7 @@ import arc.math.geom.Point2;
 import arc.struct.Seq;
 import arc.util.*;
 import mindustry.content.Blocks;
+import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.game.EventType;
 import mindustry.game.Team;
@@ -18,8 +19,7 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.modules.ItemModule;
 
-import static mindustry.Vars.state;
-import static mindustry.Vars.world;
+import static mindustry.Vars.*;
 
 public final class SiegePlugin extends Plugin {
 
@@ -34,6 +34,20 @@ public final class SiegePlugin extends Plugin {
         Gamedata.reset();
         Setup.reset();
         RuleSetter.initRules();
+
+        netServer.admins.addActionFilter((action) -> {
+            // dont care
+            if (action.player == null || action.tile == null)
+                return true;
+
+            // Disallow turrets within the keep
+            // TODO: Confirm this works
+            if (Keep.keepExists() && Constants.TURRET_BLOCKS.contains(action.block) && Keep.inKeep(action.tile.build)) {
+                return false;
+            }
+
+            return true;
+        });
 
         Events.run(EventType.Trigger.update, SiegePlugin::update);
 
@@ -64,10 +78,17 @@ public final class SiegePlugin extends Plugin {
             }
         });
 
-        Events.on(EventType.BuildSelectEvent.class, event -> {
-            if (!Gamedata.gameStarted || (!event.breaking && DeadZone.getDeadZone(new Point2(event.tile.x, event.tile.y)))) {
+        Events.on(EventType.BlockBuildBeginEvent.class, event -> {
+            boolean blockEarly = !Gamedata.gameStarted;
+            boolean blockDeadZone = !event.breaking && DeadZone.insideDeadZone(event.tile.build);
+            boolean blockKeepTurrets = Constants.TURRET_BLOCKS.contains(event.tile.build.block) && Keep.inKeep(event.tile.build);
+            if (blockEarly || blockDeadZone || blockKeepTurrets) {
+                // Stop building if too early, in the deadzone, or a turret in the keep
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
+            } else if (Keep.keepExists() && event.team == Team.green && Keep.inKeep(event.tile.build)) {
+                // Make keep buildings invincible
+                event.tile.build.health = Float.MAX_VALUE;
             }
         });
 
@@ -247,6 +268,13 @@ public final class SiegePlugin extends Plugin {
     // Manages constant processes during the course of a game (does not run during setup or during game over)
     private static void gameUpdate() {
         deadZoneDamage();
+        if (Keep.keepExisted && !Keep.keepExists()) {
+            Keep.keepDissolvedListener();
+        }
+        Keep.keepExisted = Keep.keepExists();
+        if (Keep.keepExists() && Core.graphics.getFrameId() % 10 == 0) {
+            displayKeepFx();
+        }
     }
 
     // Inflicts a tick of dead zone damage to all units within it
@@ -258,6 +286,24 @@ public final class SiegePlugin extends Plugin {
                     unit.kill();
                 }
             }
+        }
+    }
+
+    // Displays an effect across the border of the keep
+    private static void displayKeepFx() {
+        // Put effects where the manhattan distance from center is equal to or the largest less than the keep radius
+        float worldMiddleX = (world.width()-1) / 2f;
+        float worldMiddleY = (world.height()-1) / 2f;
+        float widthX = Constants.KEEP_RADIUS;
+        if (Math.floor(worldMiddleX) != worldMiddleX) {
+            widthX -= 0.5f;
+        }
+        for (float diffX = -widthX; diffX <= widthX; diffX += 1f) {
+            float diffY = Constants.KEEP_RADIUS - diffX;
+            float x = worldMiddleX + diffX;
+            float y = worldMiddleY + diffY;
+            //TODO: Confirm that this displays clientside
+            Fx.pointHit.at(x, y);
         }
     }
 

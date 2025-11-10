@@ -90,6 +90,23 @@ public final class Constants {
             Items.lead, 300
     ));
 
+    public static final List<Block> TURRET_BLOCKS = List.of(
+            Blocks.duo,             Blocks.scatter,
+            Blocks.scorch,          Blocks.hail,
+            Blocks.wave,            Blocks.lancer,
+            Blocks.arc,             Blocks.parallax,
+            Blocks.swarmer,         Blocks.salvo,
+            Blocks.segment,         Blocks.tsunami,
+            Blocks.fuse,            Blocks.ripple,
+            Blocks.cyclone,         Blocks.foreshadow,
+            Blocks.spectre,         Blocks.meltdown,
+            Blocks.breach,          Blocks.diffuse,
+            Blocks.sublimate,       Blocks.titan,
+            Blocks.disperse,        Blocks.afflict,
+            Blocks.lustre,          Blocks.scathe,
+            Blocks.smite,           Blocks.malign
+    );
+
 
 
     public static final class Performance {

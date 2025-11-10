@@ -17,7 +17,7 @@ import static mindustry.Vars.*;
 public final class Setup {
     // Measured in elapsed seconds as returned by Gamedata
     private static int nextTimeReminder = 0;
-    private static boolean changedToCorePlacement = false;
+    public static boolean changedToCorePlacement = false;
 
     public static void reset() {
         nextTimeReminder = 0;
@@ -154,6 +154,15 @@ public final class Setup {
         for (RaiderTeam team : Gamedata.raiderTeams) {
             team.mindustryTeam.items().add(Constants.RAIDER_LOADOUT);
         }
+
+        // Give keep blocks infinite health
+        if (Keep.keepExists()) {
+            world.tiles.forEach(tile -> {
+                if (tile.build != null && Keep.inKeep(tile.build) && tile.build.team() == Team.green)
+                    tile.build.health = Float.MAX_VALUE;
+            });
+        }
+        Keep.keepExisted = Keep.keepExists();
 
         // Initialize dead zone
         long beginTime = System.currentTimeMillis();

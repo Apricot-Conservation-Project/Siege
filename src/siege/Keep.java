@@ -1,11 +1,25 @@
 package siege;
 
 import arc.math.geom.Point2;
+import mindustry.game.Team;
 import mindustry.gen.Building;
 
 import static mindustry.Vars.world;
 
 public class Keep {
+    public static boolean keepExisted = false;
+
+    /**
+     * Handles the tasks that have to run when the keep dissolves
+     */
+    public static void keepDissolvedListener() {
+        // When the keep dissolves, all keep buildings should revert to standard health
+        world.tiles.forEach(tile -> {
+            if (tile.build != null && Keep.inKeep(tile.build) && tile.build.team() == Team.green)
+                tile.build.health = tile.build.maxHealth;
+        });
+    }
+
     /**
      * @return Whether the keep should exist at this moment
      */

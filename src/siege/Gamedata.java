@@ -32,6 +32,27 @@ public final class Gamedata {
     }
 
     /**
+     * @return Current phase of the game
+     */
+    public static GameState getGameState() {
+        if (!gameStarted) {
+            if (Setup.changedToCorePlacement) {
+                return GameState.CorePlacement;
+            } else {
+                return GameState.TeamSetup;
+            }
+        } else if (!gameOver) {
+            if (Keep.keepExists()) {
+                return GameState.MidgameYesKeep;
+            } else {
+                return GameState.MidgameNoKeep;
+            }
+        } else {
+            return GameState.GameOver;
+        }
+    }
+
+    /**
      * @return Whether the game should have started yet. Prefer its variable form for most cases, as this is based only on time and could desync.
      */
     public static boolean gameStartTime() {

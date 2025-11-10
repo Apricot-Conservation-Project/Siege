@@ -3,6 +3,7 @@ package siege;
 import arc.math.Mathf;
 import arc.math.geom.Point2;
 import mindustry.content.Blocks;
+import mindustry.gen.Building;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.Floor;
@@ -143,5 +144,31 @@ public final class DeadZone {
                 hardGetDeadZone(new Point2(x, y));
             }
         }
+    }
+
+    /**
+     * Checks if a building is inside the dead zone. Any portion being over the dead zone counts.
+     * @param building The building to query
+     * @return Whether the building is in the dead zone
+     */
+    public static boolean insideDeadZone(Building building) {
+        float middleX = building.tileX();
+        float middleY = building.tileY();
+        if (building.block.size % 2 == 0) {
+            middleX += 0.5f;
+            middleY += 0.5f;
+        }
+        int lowX = (int)(middleX - building.block.size / 2f);
+        int lowY = (int)(middleY - building.block.size / 2f);
+        int highX = (int)(middleX + building.block.size / 2f);
+        int highY = (int)(middleY + building.block.size / 2f);
+        for (int x = lowX; x <= highX; x ++) {
+            for (int y = lowY; y <= highY; y ++) {
+                if (getDeadZone(new Point2(x, y))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
