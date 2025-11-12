@@ -40,6 +40,9 @@ public final class SiegePlugin extends Plugin {
         PlayersLastSeen = System.currentTimeMillis();
 
         netServer.admins.addActionFilter((action) -> {
+            // Refresh AFK clock
+            PersistentPlayer.fromPlayer(action.player).lastActed = System.currentTimeMillis();
+
             if (action.type == Administration.ActionType.placeBlock) {
                 boolean blockEarly = !Gamedata.gameStarted;
                 boolean blockDeadZone = DeadZone.insideDeadZone(action.tile.x, action.tile.y, action.block);
@@ -376,6 +379,12 @@ public final class SiegePlugin extends Plugin {
             RaiderTeam[] teams = Gamedata.raiderTeams.toArray(new RaiderTeam[0]);
             for (RaiderTeam team : teams) {
                 if (team.mindustryTeam.cores().size == 0) {
+                    team.destroy();
+                } else if (team.TimeOffline() > Constants.OFFLINE_TIMEOUT_PERIOD) {
+                    announce("[accent]Team " + team.stringID + " has timed out due to offline players.");
+                    team.destroy();
+                } else if (team.TimeAFK() > Constants.AFK_TIMEOUT_PERIOD) {
+                    announce("[accent]Team " + team.stringID + " has timed out due to afk players.");
                     team.destroy();
                 }
             }

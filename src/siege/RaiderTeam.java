@@ -117,6 +117,23 @@ public class RaiderTeam {
     }
 
     /**
+     * Find the time this team has been afk
+     * @return The time since the last team member made an action, in ms.
+     */
+    public long TimeAFK() {
+        long lastActed = 0;
+        for (PersistentPlayer player : players) {
+            if (player.online) {
+                return 0;
+            }
+            if (player.lastActed > lastActed) {
+                lastActed = player.lastActed;
+            }
+        }
+        return System.currentTimeMillis() - lastActed;
+    }
+
+    /**
      * Finds the location that a team would place their starting core
      * @param adjust Whether to adjust the result to avoid terrain and other conflicting cores
      * @return A tuple containing the index of the tile where the core would go, and a boolean representing whether the core had to be adjusted significantly. Can be null if the operation fails to locate a valid position.

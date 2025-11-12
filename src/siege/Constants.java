@@ -16,7 +16,8 @@ import java.util.List;
 
 public final class Constants {
     public static final int RAIDER_MAX_PLAYERS = 3; // Maximum count of players that can serve on the same Raider team
-    public static final long TIMEOUT_PERIOD = 600 * 1000; // Time (milliseconds) that no players can be present in the server before the game automatically ends
+    public static final long OFFLINE_TIMEOUT_PERIOD = 5 * 60 * 1000; // Time (milliseconds) that no players can be present in the server before the game automatically ends
+    public static final long AFK_TIMEOUT_PERIOD = 10 * 60 * 1000; // Time (milliseconds) that no players can be active in the server before the game automatically ends
     public static final int TEAM_STARTING_ID = 7; // Lowest ID that will be allocated to raider teams
 
     public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.denseRedStone;
@@ -38,7 +39,7 @@ public final class Constants {
     public static final int CORE_PLACEMENT_TIME_SECONDS = 10;
     public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
 
-    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10 * 1;
+    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10 * 60;
     public static final int KEEP_RADIUS = 70;
     public static final Effect KEEP_EFFECT = Fx.hitSquaresColor;
     public static final float DEAD_ZONE_DAMAGE_CONSTANT_TICK = 55f / 60f; // Absolute damage every tick

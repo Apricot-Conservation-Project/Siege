@@ -12,6 +12,7 @@ import java.util.Objects;
 public class PersistentPlayer {
     public boolean online;
     public long lastSeen;
+    public long lastActed;
     public Player currentPlayer;
     public static Seq<PersistentPlayer> players = new Seq<>();
 
