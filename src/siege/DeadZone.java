@@ -147,21 +147,23 @@ public final class DeadZone {
     }
 
     /**
-     * Checks if a building is inside the dead zone. Any portion being over the dead zone counts.
-     * @param building The building to query
-     * @return Whether the building is in the dead zone
+     * Checks if a (theoretical) building would be inside the dead zone. Any portion being over the dead zone counts. Pretends that the specified block was placed at the given coordinates.
+     * @param buildingX The x position of the building
+     * @param buildingY The y position of the building
+     * @param block The type of block that the building is
+     * @return Whether the building would be in the dead zone
      */
-    public static boolean insideDeadZone(Building building) {
-        float middleX = building.tileX();
-        float middleY = building.tileY();
-        if (building.block.size % 2 == 0) {
+    public static boolean insideDeadZone(int buildingX, int buildingY, Block block) {
+        float middleX = buildingX;
+        float middleY = buildingY;
+        if (block.size % 2 == 0) {
             middleX += 0.5f;
             middleY += 0.5f;
         }
-        int lowX = (int)(middleX - building.block.size / 2f);
-        int lowY = (int)(middleY - building.block.size / 2f);
-        int highX = (int)(middleX + building.block.size / 2f);
-        int highY = (int)(middleY + building.block.size / 2f);
+        int lowX = (int)(middleX - block.size / 2f);
+        int lowY = (int)(middleY - block.size / 2f);
+        int highX = (int)(middleX + block.size / 2f);
+        int highY = (int)(middleY + block.size / 2f);
         for (int x = lowX; x <= highX; x ++) {
             for (int y = lowY; y <= highY; y ++) {
                 if (getDeadZone(new Point2(x, y))) {
@@ -170,5 +172,14 @@ public final class DeadZone {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if a building is inside the dead zone. Any portion being over the dead zone counts.
+     * @param building The building to query
+     * @return Whether the building is in the dead zone
+     */
+    public static boolean insideDeadZone(Building building) {
+        return insideDeadZone(building.tile.x, building.tile.y, building.block);
     }
 }

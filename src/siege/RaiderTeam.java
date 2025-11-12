@@ -100,6 +100,23 @@ public class RaiderTeam {
     }
 
     /**
+     * Find the time this team has been offline
+     * @return The time since the last team member disconnected, in ms. Zero if the team has an online member.
+     */
+    public long TimeOffline() {
+        long lastSeen = 0;
+        for (PersistentPlayer player : players) {
+            if (player.online) {
+                return 0;
+            }
+            if (player.lastSeen > lastSeen) {
+                lastSeen = player.lastSeen;
+            }
+        }
+        return System.currentTimeMillis() - lastSeen;
+    }
+
+    /**
      * Finds the location that a team would place their starting core
      * @param adjust Whether to adjust the result to avoid terrain and other conflicting cores
      * @return A tuple containing the index of the tile where the core would go, and a boolean representing whether the core had to be adjusted significantly. Can be null if the operation fails to locate a valid position.

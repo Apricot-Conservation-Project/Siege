@@ -1,6 +1,7 @@
 package siege;
 
 import arc.*;
+import arc.func.Cons;
 import arc.math.Mathf;
 import arc.math.geom.Point2;
 import arc.struct.Seq;
@@ -12,6 +13,7 @@ import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.mod.*;
+import mindustry.net.Administration;
 import mindustry.type.ItemSeq;
 import mindustry.type.ItemStack;
 import mindustry.world.Block;
@@ -23,6 +25,7 @@ import static mindustry.Vars.*;
 
 public final class SiegePlugin extends Plugin {
 
+    public static long PlayersLastSeen;
     /**
      * Initialize the plugin - Runs as soon as the mod loads
      * Sets up events and rules
@@ -34,16 +37,17 @@ public final class SiegePlugin extends Plugin {
         Gamedata.reset();
         Setup.reset();
         RuleSetter.initRules();
+        PlayersLastSeen = System.currentTimeMillis();
 
         netServer.admins.addActionFilter((action) -> {
-            // dont care
-            if (action.player == null || action.tile == null)
-                return true;
-
-            // Disallow turrets within the keep
-            // TODO: Confirm this works
-            if (Keep.keepExists() && Constants.TURRET_BLOCKS.contains(action.block) && Keep.inKeep(action.tile.build)) {
-                return false;
+            if (action.type == Administration.ActionType.placeBlock) {
+                boolean blockEarly = !Gamedata.gameStarted;
+                boolean blockDeadZone = DeadZone.insideDeadZone(action.tile.x, action.tile.y, action.block);
+                boolean blockKeepTurrets = Keep.keepExists() && Constants.TURRET_BLOCKS.contains(action.block) && Keep.inKeep(action.tile.x, action.tile.y, action.block);
+                if (blockEarly || blockDeadZone || blockKeepTurrets) {
+                    // Stop building if too early, in the deadzone, or a turret in the keep
+                    return false;
+                }
             }
 
             return true;
@@ -81,9 +85,10 @@ public final class SiegePlugin extends Plugin {
         Events.on(EventType.BlockBuildBeginEvent.class, event -> {
             boolean blockEarly = !Gamedata.gameStarted;
             boolean blockDeadZone = !event.breaking && DeadZone.insideDeadZone(event.tile.build);
-            boolean blockKeepTurrets = Constants.TURRET_BLOCKS.contains(event.tile.build.block) && Keep.inKeep(event.tile.build);
+            boolean blockKeepTurrets = Keep.keepExists() && Constants.TURRET_BLOCKS.contains(event.tile.build.block) && Keep.inKeep(event.tile.build);
             if (blockEarly || blockDeadZone || blockKeepTurrets) {
                 // Stop building if too early, in the deadzone, or a turret in the keep
+                System.out.println("Had to block a build action by secondary means");
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
                 world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
             } else if (Keep.keepExists() && event.team == Team.green && Keep.inKeep(event.tile.build)) {
@@ -303,12 +308,15 @@ public final class SiegePlugin extends Plugin {
             float x = worldMiddleX + diffX;
             float y = worldMiddleY + diffY;
             //TODO: Confirm that this displays clientside
-            Fx.pointHit.at(x, y);
+            Constants.KEEP_EFFECT.at(x, y);
         }
     }
 
     // Verifies teams contain players and sets player teams to the correct values
     private static void checkTeams() {
+        if (stopteamfix) {
+            return;
+        }
         Gamedata.raiderTeams.removeIf(team -> team.players.isEmpty());
 
         // Ensure players are in the correct team
@@ -345,7 +353,11 @@ public final class SiegePlugin extends Plugin {
                 endGame(0);
             }
         }
+
+
     }
+
+    public static boolean stopteamfix = false;
 
     @Override
     public void registerClientCommands(CommandHandler handler) {
@@ -396,6 +408,9 @@ public final class SiegePlugin extends Plugin {
             Tile tile = world.tile(player.tileX(), player.tileY());
             tile.setNet(Blocks.coreShard, team, 0);
             DeadZone.reloadCore((CoreBlock.CoreBuild) tile.build);
+        });
+        handler.<Player>register("stopteamfix", "meow", (args, player) -> {
+            stopteamfix = true;
         });
     }
 

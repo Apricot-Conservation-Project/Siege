@@ -3,8 +3,10 @@ package siege;
 import arc.math.geom.Point2;
 import arc.struct.Seq;
 import mindustry.content.Blocks;
+import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.content.UnitTypes;
+import mindustry.entities.Effect;
 import mindustry.type.ItemSeq;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
@@ -13,8 +15,9 @@ import mindustry.world.Block;
 import java.util.List;
 
 public final class Constants {
-    public static final int RAIDER_MAX_PLAYERS = 3;
-    public static final int TEAM_STARTING_ID = 7;
+    public static final int RAIDER_MAX_PLAYERS = 3; // Maximum count of players that can serve on the same Raider team
+    public static final long TIMEOUT_PERIOD = 600 * 1000; // Time (milliseconds) that no players can be present in the server before the game automatically ends
+    public static final int TEAM_STARTING_ID = 7; // Lowest ID that will be allocated to raider teams
 
     public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.denseRedStone;
 
@@ -28,9 +31,16 @@ public final class Constants {
     public static final float FOUNDATION_DEAD_ZONE_RADIUS = 40f;
     public static final float NUCLEUS_DEAD_ZONE_RADIUS = 50f;
 
-    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10 * 60;
-    public static final int KEEP_RADIUS = 30;
-    // Fx to indicate keep borders
+    public static final int VOTEKICK_LENGTH_PREGAME_MS = 30 * 1000;
+    public static final int VOTEKICK_LENGTH_MS = 90 * 1000;
+
+    public static final int TEAM_SETUP_TIME_SECONDS = 20;
+    public static final int CORE_PLACEMENT_TIME_SECONDS = 10;
+    public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
+
+    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10 * 1;
+    public static final int KEEP_RADIUS = 70;
+    public static final Effect KEEP_EFFECT = Fx.hitSquaresColor;
     public static final float DEAD_ZONE_DAMAGE_CONSTANT_TICK = 55f / 60f; // Absolute damage every tick
     public static final float DEAD_ZONE_DAMAGE_PERCENT_TICK = 0.018f / 60f; // Percent of max health every tick
     public static final List<UnitType> DEAD_ZONE_IMMUNE_TYPES = List.of(new UnitType[] {
@@ -69,13 +79,6 @@ public final class Constants {
             Items.silicon, 250,
             Items.surgeAlloy, 150
     ));
-
-    public static final int TEAM_SETUP_TIME_SECONDS = 20;
-    public static final int CORE_PLACEMENT_TIME_SECONDS = 10;
-    public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
-
-    public static final int VOTEKICK_LENGTH_PREGAME_MS = 30 * 1000;
-    public static final int VOTEKICK_LENGTH_MS = 90 * 1000;
 
     public static final ItemSeq RAIDER_LOADOUT = new ItemSeq(ItemStack.list(
             Items.copper, 3600,

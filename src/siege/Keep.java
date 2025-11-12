@@ -3,6 +3,7 @@ package siege;
 import arc.math.geom.Point2;
 import mindustry.game.Team;
 import mindustry.gen.Building;
+import mindustry.world.Block;
 
 import static mindustry.Vars.world;
 
@@ -13,10 +14,15 @@ public class Keep {
      * Handles the tasks that have to run when the keep dissolves
      */
     public static void keepDissolvedListener() {
+        SiegePlugin.announce("[accent]The keep has dissolved. Central Citadel buildings are now vulnerable, but turrets can be built in its place.");
         // When the keep dissolves, all keep buildings should revert to standard health
         world.tiles.forEach(tile -> {
-            if (tile.build != null && Keep.inKeep(tile.build) && tile.build.team() == Team.green)
+            if (tile.build != null && Keep.inKeep(tile.build) && tile.build.team() == Team.green) {
+                System.out.println(tile);
+                System.out.println(tile.build.health);
+                System.out.println(tile.build.maxHealth);
                 tile.build.health = tile.build.maxHealth;
+            }
         });
     }
 
@@ -33,25 +39,27 @@ public class Keep {
      * @return Whether that location could be in the keep
      */
     public static boolean inKeep(Point2 tile) {
-        float worldMiddleX = world.width() / 2f;
-        float worldMiddleY = world.height() / 2f;
+        float worldMiddleX = (world.width()-1) / 2f;
+        float worldMiddleY = (world.height()-1) / 2f;
         float manhattanDist = Math.abs(worldMiddleX - tile.x) + Math.abs(worldMiddleY - tile.y);
         return manhattanDist <= Constants.KEEP_RADIUS;
     }
 
     /**
-     * Checks if a building is in the keep. Ignores whether the keep has dissolved or not. Buildings must be fully inside the keep to count.
-     * @param building The building to query
-     * @return Whether the building could be in the keep
+     * Checks if a (theoretical) building is or would be in the keep. Ignores whether the keep has dissolved or not. Buildings must be fully inside the keep to count. Pretends that the specified block was placed at the given coordinates.
+     * @param x The x position of the building
+     * @param y The y position of the building
+     * @param block The type of block that the building is
+     * @return Whether that building would be in the keep
      */
-    public static boolean inKeep(Building building) {
-        float middleX = building.tileX();
-        float middleY = building.tileY();
-        if (building.block.size % 2 == 0) {
+    public static boolean inKeep(int x, int y, Block block) {
+        float middleX = x;
+        float middleY = y;
+        if (block.size % 2 == 0) {
             middleX += 0.5f;
             middleY += 0.5f;
         }
-        float[] offsets = new float[] { -building.block.size / 2f, building.block.size / 2f };
+        float[] offsets = new float[] { -block.size / 2f, block.size / 2f };
         boolean inside = true;
         for (float xOffset : offsets) {
             for (float yOffset : offsets) {
@@ -61,5 +69,14 @@ public class Keep {
             }
         }
         return inside;
+    }
+
+    /**
+     * Checks if a building is in the keep. Ignores whether the keep has dissolved or not. Buildings must be fully inside the keep to count.
+     * @param building The building to query
+     * @return Whether the building could be in the keep
+     */
+    public static boolean inKeep(Building building) {
+        return inKeep(building.tile.x, building.tile.y, building.block);
     }
 }
