@@ -40,6 +40,8 @@ public class PersistentPlayer {
     private PersistentPlayer(Player p) {
         currentPlayer = p;
         online = true;
+        lastActed = System.currentTimeMillis();
+        lastSeen = System.currentTimeMillis();
         players.add(this);
     }
 

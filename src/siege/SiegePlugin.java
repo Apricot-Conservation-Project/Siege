@@ -80,6 +80,20 @@ public final class SiegePlugin extends Plugin {
         Events.on(EventType.PlayerJoin.class, event -> {
             PersistentPlayer.fromPlayer(event.player).online = true;
             joinMessage(event.player);
+            PersistentPlayer persistentPlayer = PersistentPlayer.fromPlayer(event.player);
+            if (Gamedata.getGameState() == GameState.TeamSetup) {
+                event.player.team(Team.blue);
+                persistentPlayer.spawn(Team.green);
+            } else {
+                RaiderTeam playerTeam = RaiderTeam.getTeam(persistentPlayer);
+                if (playerTeam != null) {
+                    event.player.team(playerTeam.mindustryTeam);
+                    persistentPlayer.spawn(playerTeam.mindustryTeam);
+                } else {
+                    event.player.team(Team.green);
+                    persistentPlayer.spawn(Team.green);
+                }
+            }
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
@@ -511,6 +525,9 @@ public final class SiegePlugin extends Plugin {
         });
         handler.<Player>register("stopteamfix", "meow", (args, player) -> {
             stopteamfix = true;
+        });
+        handler.<Player>register("startteamfix", "meow", (args, player) -> {
+            stopteamfix = false;
         });
         handler.register("datadump", "yowch", (args, player) -> {
             Gamedata.dataDump();
