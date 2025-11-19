@@ -13,8 +13,7 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.PowerTurret;
-
-import static mindustry.Vars.state;
+import mindustry.Vars;
 
 public final class RuleSetter {
     public static final float EXTRA_NO_BUILD_RADIUS = 10f;
@@ -52,8 +51,8 @@ public final class RuleSetter {
         rules.modeName = "Siege";
 
         rules.enemyCoreBuildRadius = 8 * (Constants.NUCLEUS_DEAD_ZONE_RADIUS + EXTRA_NO_BUILD_RADIUS);
-        //rules.canGameOver = false;
-        // rules.playerDamageMultiplier = 0;
+        rules.canGameOver = false;
+        //rules.playerDamageMultiplier = 0;
         rules.buildSpeedMultiplier = BUILD_SPEED_MULTIPLIER;
         rules.coreIncinerates = true;
         rules.fire = false;
@@ -73,8 +72,7 @@ public final class RuleSetter {
         ((ItemTurret) Blocks.foreshadow).ammoTypes.get(Items.surgeAlloy).buildingDamageMultiplier = 0;
         ((PowerTurret) Blocks.malign).shootType.buildingDamageMultiplier = 0;
 
-        state.rules = rules.copy();
-        Call.setRules(rules);
+        Vars.state.rules = rules.copy();
         pushRules();
     }
 
@@ -82,7 +80,8 @@ public final class RuleSetter {
      * Forcefully pushes the current ruleset to all players.
      */
     public static void pushRules() {
-        state.rules = rules.copy();
+        Vars.state.rules = rules.copy();
+        Call.setRules(rules);
         for (Player player : Groups.player) {
             for (int i = 0; i < 5; i ++) {
                 Call.setRules(player.con(), rules);

@@ -6,6 +6,7 @@ import arc.math.Mathf;
 import arc.math.geom.Point2;
 import arc.struct.Seq;
 import arc.util.*;
+import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.content.Items;
@@ -21,11 +22,11 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.modules.ItemModule;
 
-import static mindustry.Vars.*;
-
 public final class SiegePlugin extends Plugin {
 
+    public static boolean PlayersOnline;
     public static long PlayersLastSeen;
+    public static long PlayersLastActive;
     /**
      * Initialize the plugin - Runs as soon as the mod loads
      * Sets up events and rules
@@ -38,15 +39,16 @@ public final class SiegePlugin extends Plugin {
         Setup.reset();
         RuleSetter.initRules();
         PlayersLastSeen = System.currentTimeMillis();
+        PlayersLastActive = System.currentTimeMillis();
 
-        netServer.admins.addActionFilter((action) -> {
+        Vars.netServer.admins.addActionFilter((action) -> {
             // Refresh AFK clock
             PersistentPlayer.fromPlayer(action.player).lastActed = System.currentTimeMillis();
 
             if (action.type == Administration.ActionType.placeBlock) {
                 boolean blockEarly = !Gamedata.gameStarted;
                 boolean blockDeadZone = DeadZone.insideDeadZone(action.tile.x, action.tile.y, action.block);
-                boolean blockKeepTurrets = Keep.keepExists() && Constants.TURRET_BLOCKS.contains(action.block) && Keep.inKeep(action.tile.x, action.tile.y, action.block);
+                boolean blockKeepTurrets = action.player.team() == Team.green && Keep.keepExists() && Constants.TURRET_BLOCKS.contains(action.block) && Keep.inKeep(action.tile.x, action.tile.y, action.block);
                 if (blockEarly || blockDeadZone || blockKeepTurrets) {
                     // Stop building if too early, in the deadzone, or a turret in the keep
                     return false;
@@ -77,10 +79,13 @@ public final class SiegePlugin extends Plugin {
         Events.on(EventType.PlayerLeave.class, event -> {
             PersistentPlayer.fromPlayer(event.player).online = false;
             PersistentPlayer.fromPlayer(event.player).lastSeen = System.currentTimeMillis();
+            if (Groups.player.isEmpty()) {
+
+            }
         });
 
         Events.on(EventType.BlockDestroyEvent.class, event -> {
-            if (Constants.CORE_TYPES.contains(event.tile.build.block)) {
+            if (Constants.CORE_TYPES.contains(event.tile.block())) {
                 coreDestroy(event.tile.build);
             }
         });
@@ -92,8 +97,8 @@ public final class SiegePlugin extends Plugin {
             if (blockEarly || blockDeadZone || blockKeepTurrets) {
                 // Stop building if too early, in the deadzone, or a turret in the keep
                 System.out.println("Had to block a build action by secondary means");
-                world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
-                world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
+                Vars.world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
+                Vars.world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
             } else if (Keep.keepExists() && event.team == Team.green && Keep.inKeep(event.tile.build)) {
                 // Make keep buildings invincible
                 event.tile.build.health = Float.MAX_VALUE;
@@ -150,7 +155,8 @@ public final class SiegePlugin extends Plugin {
             }
         }
 
-        Time.run(20f, () -> DeadZone.reloadCore((CoreBlock.CoreBuild) core));
+        // WIP measure, later on this should be a gradual process
+        Time.run(20f * 60f, () -> DeadZone.reloadCore((CoreBlock.CoreBuild) core));
     }
 
     /**
@@ -210,7 +216,12 @@ public final class SiegePlugin extends Plugin {
         ItemSeq adjustedGlobalPrice = new ItemSeq();
         for (ItemStack items : globalPrice) {
             if (items.amount >= Constants.MINIMUM_CORE_PRICE_ITEMS) {
-                adjustedGlobalPrice.add(items);
+                int amount = items.amount;
+                if (cores.size < Constants.RAMP_UP_CORE_COUNT) {
+                    float amountRatio = (float)cores.size / (float)Constants.RAMP_UP_CORE_COUNT;
+                    amount = (int) Math.ceil(amount / amountRatio);
+                }
+                adjustedGlobalPrice.add(new ItemStack(items.item, amount));
             }
         }
         // Can the team afford the price?
@@ -244,33 +255,56 @@ public final class SiegePlugin extends Plugin {
      * @param winner The game's winner. 0 if the Citadel wins, otherwise is the ID of the winning team. -1 if the game is ended without a winner.
      */
     public static void endGame(int winner) {
+        System.out.println("Ending the game");
         Gamedata.gameOver = true;
+        boolean endedGame = false;
+        //Vars.state.rules.canGameOver = true;
+        //RuleSetter.pushRules();
+        //Team winnerTeam = Team.derelict;
 
         if (winner == 0) {
             announce("[accent]The [green]Citadel[] has won the game!");
-            state.rules.canGameOver = true;
+            Events.fire(new EventType.GameOverEvent(Team.green));
+            endedGame = true;
+            //winnerTeam = Team.green;
+            //state.rules.canGameOver = true;
             //Time.run(60f, () -> {state.rules.canGameOver = false;});
         } else if (winner == -1) {
             announce("[accent]Game ended without a winner.");
-            state.rules.canGameOver = true;
+            //state.rules.canGameOver = true;
             //Time.run(60f, () -> {state.rules.canGameOver = false;});
         } else {
             for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.id == winner) {
                     announce("[accent]Team " + team.stringID + " has won the game!");
-                    state.rules.canGameOver = true;
+                    Events.fire(new EventType.GameOverEvent(team.mindustryTeam));
+                    endedGame = true;
+                    //winnerTeam = team.mindustryTeam;
+                    //state.rules.canGameOver = true;
                     //Time.run(60f, () -> {state.rules.canGameOver = false;});
                     break;
                 }
             }
         }
-        Time.run(1.5f * 60f, () -> {
+
+        if (!endedGame) {
+            Events.fire(new EventType.GameOverEvent(Team.derelict));
+        }
+
+        //Call.gameOver(winnerTeam);
+
+        /*Time.run(2 * 60f, () -> {
+            Vars.state.rules.canGameOver = false;
+            RuleSetter.pushRules();
+        });*/
+
+        /*Time.run(1.5f * 60f, () -> {
             //Events.fire(EventType.GameOverEvent.class);
             // Only way I know how to end the game
             for (CoreBlock.CoreBuild core : Team.green.cores()) {
                 core.tile.setAir();
             }
-        });
+        });*/
     }
 
     /**
@@ -286,7 +320,7 @@ public final class SiegePlugin extends Plugin {
         } else if (!Gamedata.teamSetupPhase()) {
             player.sendMessage("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. You have joined after teams were determined, meaning you are on the Citadel team. The game will begin in " + (-Gamedata.elapsedTimeSeconds()) + " seconds. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
         } else {
-            player.sendMessage("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. Team setup is currently ongoing, if you would like to create or join a team, run /team. Team setup will end in " + (-Gamedata.elapsedTimeSeconds() - Constants.CORE_PLACEMENT_TIME_SECONDS) + " seconds. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
+            player.sendMessage("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. Team setup is currently ongoing, if you would like to create or join a Raider team, run /team. Team setup will end in " + (-Gamedata.elapsedTimeSeconds() - Constants.CORE_PLACEMENT_TIME_SECONDS) + " seconds. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
         }
     }
 
@@ -305,6 +339,16 @@ public final class SiegePlugin extends Plugin {
         if (Keep.keepExists() && Core.graphics.getFrameId() % 10 == 0) {
             displayKeepFx();
         }
+
+        if (Team.green.cores().size == 0) {
+            if (Gamedata.raiderTeams.size() == 1) {
+                System.out.println("ending game, raider winner, no more citadel cores");
+                endGame(Gamedata.raiderTeams.get(0).id);
+            } else {
+                System.out.println("ending game, no winner, no more citadel cores");
+                endGame(-1);
+            }
+        }
     }
 
     private static long previousDeadZoneCheck = 0L;
@@ -313,11 +357,11 @@ public final class SiegePlugin extends Plugin {
         if (previousDeadZoneCheck == 0L) {
             previousDeadZoneCheck = System.currentTimeMillis() - (1000 / 60);
         }
-        previousDeadZoneCheck = System.currentTimeMillis();
         float elapsedTimeSeconds = (System.currentTimeMillis() - previousDeadZoneCheck) / 1000f;
         float elapsedTimeTicks = elapsedTimeSeconds * 60f;
         float constantDamage = Constants.DEAD_ZONE_DAMAGE_CONSTANT_TICK * elapsedTimeTicks;
         float percentDamage = Constants.DEAD_ZONE_DAMAGE_PERCENT_TICK * elapsedTimeTicks;
+        previousDeadZoneCheck = System.currentTimeMillis();
         for (Unit unit : Groups.unit) {
             if (DeadZone.getDeadZone(unit.tileOn())  &&  !Constants.DEAD_ZONE_IMMUNE_TYPES.contains(unit.type)) {
                 unit.health -= constantDamage + unit.maxHealth * percentDamage;
@@ -331,8 +375,8 @@ public final class SiegePlugin extends Plugin {
     // Displays an effect across the border of the keep
     private static void displayKeepFx() {
         // Put effects where the manhattan distance from center is equal to or the largest less than the keep radius
-        float worldMiddleX = (world.width()-1) / 2f;
-        float worldMiddleY = (world.height()-1) / 2f;
+        float worldMiddleX = (Vars.world.width()-1) / 2f;
+        float worldMiddleY = (Vars.world.height()-1) / 2f;
         float widthX = Constants.KEEP_RADIUS;
         if (Math.floor(worldMiddleX) != worldMiddleX) {
             widthX -= 0.5f;
@@ -377,20 +421,27 @@ public final class SiegePlugin extends Plugin {
         if (Gamedata.gameStarted) {
             // Gamedata.raiderTeams may be modified inside this loop.
             RaiderTeam[] teams = Gamedata.raiderTeams.toArray(new RaiderTeam[0]);
+            int winnerCode = 0;
             for (RaiderTeam team : teams) {
                 if (team.mindustryTeam.cores().size == 0) {
                     team.destroy();
                 } else if (team.TimeOffline() > Constants.OFFLINE_TIMEOUT_PERIOD) {
                     announce("[accent]Team " + team.stringID + " has timed out due to offline players.");
                     team.destroy();
+                    if (!Constants.CITADEL_WINS_ON_RAIDER_TIMEOUT) {
+                        winnerCode = -1;
+                    }
                 } else if (team.TimeAFK() > Constants.AFK_TIMEOUT_PERIOD) {
                     announce("[accent]Team " + team.stringID + " has timed out due to afk players.");
                     team.destroy();
+                    if (!Constants.CITADEL_WINS_ON_RAIDER_TIMEOUT) {
+                        winnerCode = -1;
+                    }
                 }
             }
 
             if (Gamedata.raiderTeams.isEmpty()) {
-                endGame(0);
+                endGame(winnerCode);
             }
         }
 
@@ -425,32 +476,40 @@ public final class SiegePlugin extends Plugin {
         handler.<Player>register("money", "free money", (args, player) -> {
             Team team = player.team();
             team.items().add(new ItemSeq(ItemStack.list(
-                    Items.copper, 10000,
-                    Items.lead, 10000,
-                    Items.metaglass, 10000,
-                    Items.graphite, 10000,
-                    Items.sand, 10000,
-                    Items.coal, 10000,
-                    Items.titanium, 10000,
-                    Items.thorium, 10000,
-                    Items.scrap, 10000,
-                    Items.silicon, 10000,
-                    Items.plastanium, 10000,
-                    Items.phaseFabric, 10000,
-                    Items.surgeAlloy, 10000,
-                    Items.sporePod, 10000,
-                    Items.blastCompound, 10000,
-                    Items.pyratite, 10000
+                    Items.copper, 100000,
+                    Items.lead, 100000,
+                    Items.metaglass, 100000,
+                    Items.graphite, 100000,
+                    Items.sand, 100000,
+                    Items.coal, 100000,
+                    Items.titanium, 100000,
+                    Items.thorium, 100000,
+                    Items.scrap, 100000,
+                    Items.silicon, 100000,
+                    Items.plastanium, 100000,
+                    Items.phaseFabric, 100000,
+                    Items.surgeAlloy, 100000,
+                    Items.sporePod, 100000,
+                    Items.blastCompound, 100000,
+                    Items.pyratite, 100000
             )));
         });
         handler.<Player>register("core", "place a core at your location", (args, player) -> {
             Team team = player.team();
-            Tile tile = world.tile(player.tileX(), player.tileY());
+            Tile tile = Vars.world.tile(player.tileX(), player.tileY());
             tile.setNet(Blocks.coreShard, team, 0);
             DeadZone.reloadCore((CoreBlock.CoreBuild) tile.build);
         });
         handler.<Player>register("stopteamfix", "meow", (args, player) -> {
             stopteamfix = true;
+        });
+        handler.register("datadump", "yowch", (args, player) -> {
+            Gamedata.dataDump();
+        });
+
+        handler.register("test", "test", (args, player) -> {
+            Events.fire(new EventType.GameOverEvent(Team.derelict));
+            //Call.
         });
     }
 

@@ -18,6 +18,7 @@ public final class Constants {
     public static final int RAIDER_MAX_PLAYERS = 3; // Maximum count of players that can serve on the same Raider team
     public static final long OFFLINE_TIMEOUT_PERIOD = 5 * 60 * 1000; // Time (milliseconds) that no players can be present in the server before the game automatically ends
     public static final long AFK_TIMEOUT_PERIOD = 10 * 60 * 1000; // Time (milliseconds) that no players can be active in the server before the game automatically ends
+    public static final boolean CITADEL_WINS_ON_RAIDER_TIMEOUT = true;
     public static final int TEAM_STARTING_ID = 7; // Lowest ID that will be allocated to raider teams
 
     public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.denseRedStone;
@@ -39,11 +40,11 @@ public final class Constants {
     public static final int CORE_PLACEMENT_TIME_SECONDS = 10;
     public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
 
-    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10 * 60;
+    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10;
     public static final int KEEP_RADIUS = 70;
     public static final Effect KEEP_EFFECT = Fx.hitSquaresColor;
     public static final float DEAD_ZONE_DAMAGE_CONSTANT_TICK = 55f / 60f; // Absolute damage every tick
-    public static final float DEAD_ZONE_DAMAGE_PERCENT_TICK = 0.018f / 60f; // Percent of max health every tick
+    public static final float DEAD_ZONE_DAMAGE_PERCENT_TICK = 1.8f / 100f / 60f; // Percent of max health every tick
     public static final List<UnitType> DEAD_ZONE_IMMUNE_TYPES = List.of(new UnitType[] {
             UnitTypes.alpha,
             UnitTypes.beta,
@@ -56,6 +57,8 @@ public final class Constants {
     // At harmonic factors above this it may be necessary to build closer cores or expand storage before building the desired core.
     // For every core, the price will be simulated for if the harmonic factor was at this value, and any prices exceeding that which could be stored if all current cores were shards will be subtracted down to that value, and that subtraction applies to the final amount.
     public static final float GUARANTEED_HARMONIC_FACTOR = 15f;
+    // If you have less than this many cores, prices will scale by what fraction of this number you have
+    public static final int RAMP_UP_CORE_COUNT = 3;
 
     // Must be charged from the vault
     public static final ItemSeq CONSTANT_CORE_PRICE_LOCAL = new ItemSeq(ItemStack.list(

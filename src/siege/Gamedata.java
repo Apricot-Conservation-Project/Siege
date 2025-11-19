@@ -110,6 +110,7 @@ public final class Gamedata {
         System.out.println("startTime: " + startTime);
         System.out.println("gameStarted: " + gameStarted);
         System.out.println("gameOver: " + gameOver);
+        System.out.println("keep exists: " + Keep.keepExists());
         System.out.println("elapsedTimeSeconds(): " + elapsedTimeSeconds());
         System.out.println("--- Setup ---");
         Setup.dataDump();
