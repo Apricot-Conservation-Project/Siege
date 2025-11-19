@@ -3,7 +3,7 @@ package siege;
 import arc.*;
 import arc.func.Cons;
 import arc.math.Mathf;
-import arc.math.geom.Point2;
+import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.*;
 import mindustry.Vars;
@@ -92,9 +92,10 @@ public final class SiegePlugin extends Plugin {
 
         Events.on(EventType.BlockBuildBeginEvent.class, event -> {
             boolean blockEarly = !Gamedata.gameStarted;
-            boolean blockDeadZone = !event.breaking && DeadZone.insideDeadZone(event.tile.build);
-            boolean blockKeepTurrets = Keep.keepExists() && Constants.TURRET_BLOCKS.contains(event.tile.build.block) && Keep.inKeep(event.tile.build);
-            if (blockEarly || blockDeadZone || blockKeepTurrets) {
+            boolean blockDeadZone = !event.breaking && DeadZone.insideDeadZone(event.tile.x, event.tile.y, event.tile.block());
+            boolean blockKeepTurrets = Keep.keepExists() && Constants.TURRET_BLOCKS.contains(event.tile.block()) && Keep.inKeep(event.tile.x, event.tile.y, event.tile.block());
+            boolean blockBanned = RuleSetter.getBannedBlocks(event.team).contains(event.tile.block());
+            if (blockEarly || blockDeadZone || blockKeepTurrets || blockBanned) {
                 // Stop building if too early, in the deadzone, or a turret in the keep
                 System.out.println("Had to block a build action by secondary means");
                 Vars.world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
