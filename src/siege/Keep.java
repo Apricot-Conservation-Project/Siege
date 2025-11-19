@@ -1,6 +1,8 @@
 package siege;
 
+import arc.math.Mathf;
 import arc.math.geom.Point2;
+import mindustry.Vars;
 import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.gen.Groups;
@@ -47,8 +49,8 @@ public class Keep {
      * @return Whether that location could be in the keep
      */
     public static boolean inKeep(Point2 tile) {
-        float worldMiddleX = (world.width()-1) / 2f;
-        float worldMiddleY = (world.height()-1) / 2f;
+        float worldMiddleX = (Vars.world.width()-1) / 2f;
+        float worldMiddleY = (Vars.world.height()-1) / 2f;
         float manhattanDist = Math.abs(worldMiddleX - tile.x) + Math.abs(worldMiddleY - tile.y);
         return manhattanDist <= Constants.KEEP_RADIUS;
     }
@@ -67,11 +69,12 @@ public class Keep {
             middleX += 0.5f;
             middleY += 0.5f;
         }
-        float[] offsets = new float[] { -block.size / 2f, block.size / 2f };
+        float diff = block.size / 2f - 0.5f;
+        float[] offsets = new float[] { -diff, diff };
         boolean inside = true;
         for (float xOffset : offsets) {
             for (float yOffset : offsets) {
-                if (!inKeep(new Point2((int) (middleX + xOffset), (int) (middleY + yOffset)))) {
+                if (!inKeep(new Point2(Mathf.round(middleX + xOffset), Mathf.round(middleY + yOffset)))) {
                     inside = false;
                 }
             }

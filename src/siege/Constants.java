@@ -42,7 +42,7 @@ public final class Constants {
     public static final int CORE_PLACEMENT_TIME_SECONDS = 10;
     public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
 
-    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10;
+    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10 * 60;
     public static final int KEEP_RADIUS = 70;
     public static final Effect KEEP_EFFECT = Fx.hitSquaresColor;
     public static final float DEAD_ZONE_DAMAGE_CONSTANT_TICK = 55f / 60f; // Absolute damage every tick

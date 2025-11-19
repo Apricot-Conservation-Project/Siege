@@ -2,6 +2,7 @@ package siege;
 
 import arc.*;
 import arc.func.Cons;
+import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.struct.ObjectSet;
 import arc.struct.Seq;
@@ -23,10 +24,14 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.modules.ItemModule;
 
+import java.util.random.RandomGenerator;
+
 public final class SiegePlugin extends Plugin {
 
     public static long PlayersLastSeen;
     public static long PlayersLastActive;
+
+    public static RandomGenerator GENERATOR = RandomGenerator.getDefault();
     /**
      * Initialize the plugin - Runs as soon as the mod loads
      * Sets up events and rules
@@ -154,6 +159,48 @@ public final class SiegePlugin extends Plugin {
             e.printStackTrace();
             Gamedata.dataDump();
             announce("[red]Exception thrown during tick update");
+        }
+    }
+
+    // Manages constant processes that happen always
+    private static void alwaysUpdate() {
+        checkTeams();
+
+        if (Keep.keepExists() && Core.graphics.getFrameId() % 10 == 0) {
+            displayKeepFx();
+        }
+    }
+
+    // Manages constant processes during the course of a game (does not run during setup or during game over)
+    private static void gameUpdate() {
+        deadZoneDamage();
+        if (Keep.keepExisted && !Keep.keepExists()) {
+            Keep.keepDissolvedListener();
+        }
+        Keep.keepExisted = Keep.keepExists();
+
+        if (Team.green.cores().size == 0) {
+            if (Gamedata.raiderTeams.size() == 1) {
+                System.out.println("ending game, raider winner, no more citadel cores");
+                endGame(Gamedata.raiderTeams.get(0).id);
+                return;
+            } else {
+                System.out.println("ending game, no winner, no more citadel cores");
+                endGame(-1);
+                return;
+            }
+        }
+
+        // Timeout if no actions are made for long enough or if players are disconnected for too long
+        if (Groups.player.isEmpty() && System.currentTimeMillis() > PlayersLastSeen + Constants.OFFLINE_TIMEOUT_PERIOD) {
+            announce("[accent]All players were offline, and the game has timed out.");
+            endGame(-1);
+            return;
+        }
+        if (System.currentTimeMillis() > PlayersLastActive + Constants.AFK_TIMEOUT_PERIOD) {
+            announce("[accent]All players were AFK, and the game has timed out.");
+            endGame(-1);
+            return;
         }
     }
 
@@ -312,47 +359,6 @@ public final class SiegePlugin extends Plugin {
         }
     }
 
-    // Manages constant processes that happen always
-    private static void alwaysUpdate() {
-        checkTeams();
-    }
-
-    // Manages constant processes during the course of a game (does not run during setup or during game over)
-    private static void gameUpdate() {
-        deadZoneDamage();
-        if (Keep.keepExisted && !Keep.keepExists()) {
-            Keep.keepDissolvedListener();
-        }
-        Keep.keepExisted = Keep.keepExists();
-        if (Keep.keepExists() && Core.graphics.getFrameId() % 10 == 0) {
-            displayKeepFx();
-        }
-
-        if (Team.green.cores().size == 0) {
-            if (Gamedata.raiderTeams.size() == 1) {
-                System.out.println("ending game, raider winner, no more citadel cores");
-                endGame(Gamedata.raiderTeams.get(0).id);
-                return;
-            } else {
-                System.out.println("ending game, no winner, no more citadel cores");
-                endGame(-1);
-                return;
-            }
-        }
-
-        // Timeout if no actions are made for long enough or if players are disconnected for too long
-        if (Groups.player.isEmpty() && System.currentTimeMillis() > PlayersLastSeen + Constants.OFFLINE_TIMEOUT_PERIOD) {
-            announce("[accent]All players were offline, and the game has timed out.");
-            endGame(-1);
-            return;
-        }
-        if (System.currentTimeMillis() > PlayersLastActive + Constants.AFK_TIMEOUT_PERIOD) {
-            announce("[accent]All players were AFK, and the game has timed out.");
-            endGame(-1);
-            return;
-        }
-    }
-
     private static long previousDeadZoneCheck = 0L;
     // Inflicts a tick of dead zone damage to all units within it
     private static void deadZoneDamage() {
@@ -384,11 +390,14 @@ public final class SiegePlugin extends Plugin {
             widthX -= 0.5f;
         }
         for (float diffX = -widthX; diffX <= widthX; diffX += 1f) {
-            float diffY = Constants.KEEP_RADIUS - diffX;
+            float diffY = Constants.KEEP_RADIUS - Math.abs(diffX);
             float x = worldMiddleX + diffX;
-            float y = worldMiddleY + diffY;
-            //TODO: Confirm that this displays clientside
-            Constants.KEEP_EFFECT.at(x, y);
+            float y1 = worldMiddleY + diffY;
+            float y2 = worldMiddleY - diffY;
+
+            Call.effect(Constants.KEEP_EFFECT, x * 8f, y1 * 8f, 0, Color.green);
+            if (y1 != y2) //TODO this can be done branchless
+                Call.effect(Constants.KEEP_EFFECT, x * 8f, y2 * 8f, 0, Color.green);
         }
     }
 
