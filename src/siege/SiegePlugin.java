@@ -24,7 +24,6 @@ import mindustry.world.modules.ItemModule;
 
 public final class SiegePlugin extends Plugin {
 
-    public static boolean PlayersOnline;
     public static long PlayersLastSeen;
     public static long PlayersLastActive;
     /**
@@ -77,11 +76,10 @@ public final class SiegePlugin extends Plugin {
         });
 
         Events.on(EventType.PlayerLeave.class, event -> {
+            // LastSeen is not necessarily correct, but it is correct when no players are online (!player.online or Groups.Players.isEmpty)
             PersistentPlayer.fromPlayer(event.player).online = false;
             PersistentPlayer.fromPlayer(event.player).lastSeen = System.currentTimeMillis();
-            if (Groups.player.isEmpty()) {
-
-            }
+            PlayersLastSeen = System.currentTimeMillis();
         });
 
         Events.on(EventType.BlockDestroyEvent.class, event -> {
@@ -258,30 +256,19 @@ public final class SiegePlugin extends Plugin {
         System.out.println("Ending the game");
         Gamedata.gameOver = true;
         boolean endedGame = false;
-        //Vars.state.rules.canGameOver = true;
-        //RuleSetter.pushRules();
-        //Team winnerTeam = Team.derelict;
 
         if (winner == 0) {
             announce("[accent]The [green]Citadel[] has won the game!");
             Events.fire(new EventType.GameOverEvent(Team.green));
             endedGame = true;
-            //winnerTeam = Team.green;
-            //state.rules.canGameOver = true;
-            //Time.run(60f, () -> {state.rules.canGameOver = false;});
         } else if (winner == -1) {
             announce("[accent]Game ended without a winner.");
-            //state.rules.canGameOver = true;
-            //Time.run(60f, () -> {state.rules.canGameOver = false;});
         } else {
             for (RaiderTeam team : Gamedata.raiderTeams) {
                 if (team.id == winner) {
                     announce("[accent]Team " + team.stringID + " has won the game!");
                     Events.fire(new EventType.GameOverEvent(team.mindustryTeam));
                     endedGame = true;
-                    //winnerTeam = team.mindustryTeam;
-                    //state.rules.canGameOver = true;
-                    //Time.run(60f, () -> {state.rules.canGameOver = false;});
                     break;
                 }
             }
@@ -290,21 +277,6 @@ public final class SiegePlugin extends Plugin {
         if (!endedGame) {
             Events.fire(new EventType.GameOverEvent(Team.derelict));
         }
-
-        //Call.gameOver(winnerTeam);
-
-        /*Time.run(2 * 60f, () -> {
-            Vars.state.rules.canGameOver = false;
-            RuleSetter.pushRules();
-        });*/
-
-        /*Time.run(1.5f * 60f, () -> {
-            //Events.fire(EventType.GameOverEvent.class);
-            // Only way I know how to end the game
-            for (CoreBlock.CoreBuild core : Team.green.cores()) {
-                core.tile.setAir();
-            }
-        });*/
     }
 
     /**
@@ -344,10 +316,24 @@ public final class SiegePlugin extends Plugin {
             if (Gamedata.raiderTeams.size() == 1) {
                 System.out.println("ending game, raider winner, no more citadel cores");
                 endGame(Gamedata.raiderTeams.get(0).id);
+                return;
             } else {
                 System.out.println("ending game, no winner, no more citadel cores");
                 endGame(-1);
+                return;
             }
+        }
+
+        // Timeout if no actions are made for long enough or if players are disconnected for too long
+        if (Groups.player.isEmpty() && PlayersLastSeen + Constants.OFFLINE_TIMEOUT_PERIOD > System.currentTimeMillis()) {
+            announce("[accent]All players were offline, and the game has timed out.");
+            endGame(-1);
+            return;
+        }
+        if (PlayersLastActive + Constants.AFK_TIMEOUT_PERIOD > System.currentTimeMillis()) {
+            announce("[accent]All players were AFK, and the game has timed out.");
+            endGame(-1);
+            return;
         }
     }
 
@@ -444,8 +430,6 @@ public final class SiegePlugin extends Plugin {
                 endGame(winnerCode);
             }
         }
-
-
     }
 
     public static boolean stopteamfix = false;
@@ -532,7 +516,7 @@ public final class SiegePlugin extends Plugin {
         handler.register("gameover", "[map(index)]", "End the Siege game", args -> {
             Call.sendMessage("[scarlet]Server[accent] has ended the plague game. Ending in 10 seconds...");
             Log.info("Game ended.");
-            // TODO end the game
+            endgame(-1);
         });*/
     }
 

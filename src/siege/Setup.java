@@ -102,6 +102,9 @@ public final class Setup {
     public static void beginGame() {
         Gamedata.gameStarted = true;
 
+        SiegePlugin.PlayersLastSeen = System.currentTimeMillis();
+        SiegePlugin.PlayersLastActive = System.currentTimeMillis();
+
         // Add raider team cores
         // Teams can be removed here if they have no players.
         RaiderTeam[] teams = Gamedata.raiderTeams.toArray(new RaiderTeam[0]);
