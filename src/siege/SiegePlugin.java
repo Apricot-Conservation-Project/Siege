@@ -51,12 +51,18 @@ public final class SiegePlugin extends Plugin {
             PersistentPlayer.fromPlayer(action.player).lastActed = System.currentTimeMillis();
 
             if (action.type == Administration.ActionType.placeBlock) {
+                // Disallow building if:
+                // Before game start
                 boolean blockEarly = !Gamedata.gameStarted;
+                // On "undecided" team
+                boolean blockBlue = action.player.team() == Team.blue;
+                // Trying to build in the dead zone
                 boolean blockDeadZone = DeadZone.insideDeadZone(action.tile.x, action.tile.y, action.block);
+                // Trying to build a turret inside of the keep
                 boolean blockKeepTurrets = action.player.team() == Team.green && Keep.keepExists() && Constants.TURRET_BLOCKS.contains(action.block) && Keep.inKeep(action.tile.x, action.tile.y, action.block);
+                // Trying to build a block that's currently banned for your team
                 boolean blockBanned = RuleSetter.getBannedBlocks(action.player.team()).contains(action.block);
-                if (blockEarly || blockDeadZone || blockKeepTurrets || blockBanned) {
-                    // Stop building if too early, in the deadzone, a turret in the keep, or a banned block
+                if (blockEarly || blockBlue || blockDeadZone || blockKeepTurrets || blockBanned) {
                     return false;
                 }
             }
@@ -110,16 +116,7 @@ public final class SiegePlugin extends Plugin {
         });
 
         Events.on(EventType.BlockBuildBeginEvent.class, event -> {
-            boolean blockEarly = !Gamedata.gameStarted;
-            boolean blockDeadZone = !event.breaking && DeadZone.insideDeadZone(event.tile.x, event.tile.y, event.tile.block());
-            boolean blockKeepTurrets = Keep.keepExists() && Constants.TURRET_BLOCKS.contains(event.tile.block()) && Keep.inKeep(event.tile.x, event.tile.y, event.tile.block());
-            boolean blockBanned = RuleSetter.getBannedBlocks(event.team).contains(event.tile.block());
-            if (blockEarly || blockDeadZone || blockKeepTurrets || blockBanned) {
-                // Stop building if too early, in the deadzone, or a turret in the keep
-                System.out.println("Had to block a build action by secondary means");
-                Vars.world.tile(event.tile.x, event.tile.y).setNet(Blocks.worldProcessor, Team.blue, 0);
-                Vars.world.tile(event.tile.x, event.tile.y).setNet(Blocks.air);
-            } else if (Keep.keepExists() && event.team == Team.green && Keep.inKeep(event.tile.build)) {
+            if (Keep.keepExists() && event.team == Team.green && Keep.inKeep(event.tile.build)) {
                 // Make keep buildings invincible
                 event.tile.build.health = Float.MAX_VALUE;
             }
