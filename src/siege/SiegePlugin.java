@@ -11,6 +11,7 @@ import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.game.EventType;
+import mindustry.game.Rules;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.mod.*;
@@ -48,8 +49,9 @@ public final class SiegePlugin extends Plugin {
                 boolean blockEarly = !Gamedata.gameStarted;
                 boolean blockDeadZone = DeadZone.insideDeadZone(action.tile.x, action.tile.y, action.block);
                 boolean blockKeepTurrets = action.player.team() == Team.green && Keep.keepExists() && Constants.TURRET_BLOCKS.contains(action.block) && Keep.inKeep(action.tile.x, action.tile.y, action.block);
-                if (blockEarly || blockDeadZone || blockKeepTurrets) {
-                    // Stop building if too early, in the deadzone, or a turret in the keep
+                boolean blockBanned = RuleSetter.getBannedBlocks(action.player.team()).contains(action.block);
+                if (blockEarly || blockDeadZone || blockKeepTurrets || blockBanned) {
+                    // Stop building if too early, in the deadzone, a turret in the keep, or a banned block
                     return false;
                 }
             }
@@ -112,6 +114,19 @@ public final class SiegePlugin extends Plugin {
         Events.on(EventType.TapEvent.class, event -> {
             if (event.tile.build != null && event.tile.build.block == Blocks.vault) {
                 attemptCore(event.tile.build, event.player);
+            }
+        });
+
+        Events.on(EventType.UnitCreateEvent.class, event -> {
+            if (event.unit.team == Team.green && Keep.keepExists()) {
+                event.unit.damageMultiplier(0f);
+            }
+
+            // Kill unit if not allowed
+            if (RuleSetter.getBannedUnits(event.unit.team).contains(event.unit.type)) {
+                event.unit.kill();
+                // Call.unitDestroy(event.unit.id); TODO is this necessary for synchronization?
+                announce("[orange]The unit built at [accent]" + (int)event.unit.x + ", " + (int)event.unit.y + "[] is not allowed at this time and has been killed. Run the [accent]/siege[] command to learn more.");
             }
         });
     }

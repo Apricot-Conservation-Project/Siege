@@ -1,5 +1,6 @@
 package siege;
 
+import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
@@ -11,6 +12,9 @@ import mindustry.game.Teams;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
+import mindustry.gen.Unit;
+import mindustry.type.UnitType;
+import mindustry.world.Block;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
 import mindustry.world.blocks.defense.turrets.PowerTurret;
 import mindustry.Vars;
@@ -32,6 +36,51 @@ public final class RuleSetter {
         if (forcePushIndex >= forcePushPeriod) {
             forcePushIndex = 0;
             pushRules();
+        }
+    }
+
+    public static ObjectSet<Block> getBannedBlocks(Team team) {
+        ObjectSet<Block> bannedBlocks = new ObjectSet<Block>(Constants.ALWAYS_BANNED_BLOCKS);
+        if (team == Team.green) {
+            bannedBlocks.addAll(Constants.BANNED_BLOCKS_CITADEL);
+            if (Keep.keepExists()) {
+                bannedBlocks.addAll(Constants.BANNED_BLOCKS_CITADEL_KEEP_ON);
+            }
+        } else {
+            bannedBlocks.addAll(Constants.BANNED_BLOCKS_RAIDERS);
+            if (Keep.keepExists()) {
+                bannedBlocks.addAll(Constants.BANNED_BLOCKS_RAIDERS_KEEP_ON);
+            }
+        }
+        return bannedBlocks;
+    }
+
+    public static ObjectSet<UnitType> getBannedUnits(Team team) {
+        ObjectSet<UnitType> bannedUnits = new ObjectSet<UnitType>(Constants.ALWAYS_BANNED_UNITS);
+        if (team == Team.green) {
+            bannedUnits.addAll(Constants.BANNED_UNITS_CITADEL);
+            if (Keep.keepExists()) {
+                bannedUnits.addAll(Constants.BANNED_UNITS_CITADEL_KEEP_ON);
+            }
+        } else {
+            bannedUnits.addAll(Constants.BANNED_UNITS_RAIDERS);
+            if (Keep.keepExists()) {
+                bannedUnits.addAll(Constants.BANNED_UNITS_RAIDERS_KEEP_ON);
+            }
+        }
+        return bannedUnits;
+    }
+
+    /**
+     * Updates the rules a player abides by
+     * @param player
+     */
+    public static void updatePlayerRules(Player player) {
+        Rules tempRules = RuleSetter.rules.copy();
+        tempRules.bannedBlocks = getBannedBlocks(player.team());
+        tempRules.bannedUnits = getBannedUnits(player.team());
+        for (int i = 0; i < 5; i++) { // Just making sure the packet gets there
+            Call.setRules(player.con, tempRules);
         }
     }
 
@@ -65,7 +114,7 @@ public final class RuleSetter {
         UnitTypes.alpha.weapons = new Seq<>();
         UnitTypes.beta.weapons = new Seq<>();
         UnitTypes.gamma.weapons = new Seq<>();
-        UnitTypes.poly.weapons = new Seq<>();
+        UnitTypes.poly.weapons = new Seq<>(); // TODO let these use their healing powers
         UnitTypes.mega.weapons = new Seq<>();
         UnitTypes.flare.weapons = new Seq<>();
 
@@ -83,9 +132,7 @@ public final class RuleSetter {
         Vars.state.rules = rules.copy();
         Call.setRules(rules);
         for (Player player : Groups.player) {
-            for (int i = 0; i < 5; i ++) {
-                Call.setRules(player.con(), rules);
-            }
+            updatePlayerRules(player);
         }
     }
 }

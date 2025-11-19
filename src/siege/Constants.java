@@ -1,12 +1,14 @@
 package siege;
 
 import arc.math.geom.Point2;
+import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import mindustry.content.Blocks;
 import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.content.UnitTypes;
 import mindustry.entities.Effect;
+import mindustry.gen.Unit;
 import mindustry.type.ItemSeq;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
@@ -122,6 +124,85 @@ public final class Constants {
             Blocks.lustre,          Blocks.scathe,
             Blocks.smite,           Blocks.malign
     );
+
+    public static final List<UnitType> CORE_UNITS = List.of(
+            UnitTypes.alpha,
+            UnitTypes.beta,
+            UnitTypes.gamma,
+            UnitTypes.evoke,
+            UnitTypes.incite,
+            UnitTypes.emanate
+    );
+
+    public static final List<UnitType> NONCOMBAT_UNITS = List.of(
+            UnitTypes.flare,
+            UnitTypes.mono,
+            UnitTypes.poly,
+            UnitTypes.mega
+    );
+
+    public static final List<UnitType> COMBAT_UNITS = List.of(
+            UnitTypes.mace,
+            UnitTypes.dagger,
+            UnitTypes.crawler,
+            UnitTypes.fortress,
+            UnitTypes.scepter,
+            UnitTypes.reign,
+            UnitTypes.vela,
+            UnitTypes.nova,
+            UnitTypes.pulsar,
+            UnitTypes.quasar,
+            UnitTypes.corvus,
+            UnitTypes.atrax,
+            UnitTypes.merui,
+            UnitTypes.cleroi,
+            UnitTypes.anthicus,
+            UnitTypes.tecta,
+            UnitTypes.collaris,
+            UnitTypes.spiroct,
+            UnitTypes.arkyid,
+            UnitTypes.toxopid,
+            UnitTypes.elude,
+            UnitTypes.eclipse,
+            UnitTypes.horizon,
+            UnitTypes.zenith,
+            UnitTypes.antumbra,
+            UnitTypes.avert,
+            UnitTypes.obviate,
+            UnitTypes.quell,
+            UnitTypes.disrupt,
+            UnitTypes.quad,
+            UnitTypes.oct,
+            UnitTypes.risso,
+            UnitTypes.minke,
+            UnitTypes.bryde,
+            UnitTypes.sei,
+            UnitTypes.omura,
+            UnitTypes.retusa,
+            UnitTypes.oxynoe,
+            UnitTypes.cyerce,
+            UnitTypes.aegires,
+            UnitTypes.navanax,
+            UnitTypes.stell,
+            UnitTypes.locus,
+            UnitTypes.precept,
+            UnitTypes.vanquish,
+            UnitTypes.conquer,
+            UnitTypes.latum,
+            UnitTypes.renale
+    );
+
+    public static final ObjectSet<Block> ALWAYS_BANNED_BLOCKS = new ObjectSet<>();
+    public static final ObjectSet<Block> BANNED_BLOCKS_CITADEL = new ObjectSet<>();
+    public static final ObjectSet<Block> BANNED_BLOCKS_CITADEL_KEEP_ON = new ObjectSet<>();
+    public static final ObjectSet<Block> BANNED_BLOCKS_RAIDERS = new ObjectSet<>();
+    public static final ObjectSet<Block> BANNED_BLOCKS_RAIDERS_KEEP_ON = new ObjectSet<>();
+
+    public static final ObjectSet<UnitType> ALWAYS_BANNED_UNITS = new ObjectSet<>();
+    public static final ObjectSet<UnitType> BANNED_UNITS_CITADEL = new ObjectSet<>();
+    public static final ObjectSet<UnitType> BANNED_UNITS_CITADEL_KEEP_ON = ObjectSet.with(Seq.with(COMBAT_UNITS));
+    public static final ObjectSet<UnitType> BANNED_UNITS_RAIDERS = new ObjectSet<>();
+    public static final ObjectSet<UnitType> BANNED_UNITS_RAIDERS_KEEP_ON = new ObjectSet<>();
 
 
 

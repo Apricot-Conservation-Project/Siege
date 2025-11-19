@@ -3,6 +3,7 @@ package siege;
 import arc.math.geom.Point2;
 import mindustry.game.Team;
 import mindustry.gen.Building;
+import mindustry.gen.Groups;
 import mindustry.world.Block;
 
 import static mindustry.Vars.world;
@@ -22,6 +23,13 @@ public class Keep {
                 System.out.println(tile.build.health);
                 System.out.println(tile.build.maxHealth);
                 tile.build.health = tile.build.maxHealth;
+            }
+        });
+
+        // Fix all citadel units
+        Groups.unit.forEach(unit -> {
+            if (unit.team == Team.green) {
+                unit.damageMultiplier(1f);
             }
         });
     }
