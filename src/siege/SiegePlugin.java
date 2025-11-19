@@ -325,12 +325,12 @@ public final class SiegePlugin extends Plugin {
         }
 
         // Timeout if no actions are made for long enough or if players are disconnected for too long
-        if (Groups.player.isEmpty() && PlayersLastSeen + Constants.OFFLINE_TIMEOUT_PERIOD > System.currentTimeMillis()) {
+        if (Groups.player.isEmpty() && System.currentTimeMillis() > PlayersLastSeen + Constants.OFFLINE_TIMEOUT_PERIOD) {
             announce("[accent]All players were offline, and the game has timed out.");
             endGame(-1);
             return;
         }
-        if (PlayersLastActive + Constants.AFK_TIMEOUT_PERIOD > System.currentTimeMillis()) {
+        if (System.currentTimeMillis() > PlayersLastActive + Constants.AFK_TIMEOUT_PERIOD) {
             announce("[accent]All players were AFK, and the game has timed out.");
             endGame(-1);
             return;
