@@ -2,6 +2,7 @@ package siege;
 
 import arc.math.Mathf;
 import arc.math.geom.Point2;
+import arc.util.Time;
 import mindustry.content.Blocks;
 import mindustry.game.Team;
 import mindustry.gen.Groups;
@@ -173,10 +174,10 @@ public final class Setup {
         for (CoreBlock.CoreBuild core : cores) {
             DeadZone.reloadCore(core);
         }
-        DeadZone.reloadFloor();
+        Time.run(0.25f * 60f, DeadZone::reloadFloor);
         long endTime = System.currentTimeMillis();
         int elapsed = (int) (endTime - beginTime);
-        System.out.println(elapsed + " ms to generate and write floor (" + (elapsed / (1000f / 60f)) + " ticks at 60TPS)");
+        System.out.println(elapsed + " ms to generate floor (" + (elapsed / (1000f / 60f)) + " ticks at 60TPS)");
 
         SiegePlugin.announce("[sky]Cores have been placed. Raiders and the Citadel can now build and attack. Good luck, and have fun!");
     }

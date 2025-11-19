@@ -2,6 +2,7 @@ package siege;
 
 import arc.math.Mathf;
 import arc.math.geom.Point2;
+import arc.util.Time;
 import mindustry.content.Blocks;
 import mindustry.gen.Building;
 import mindustry.world.Block;
@@ -18,6 +19,57 @@ public final class DeadZone {
     // The floor beneath the dead zone
     private static Floor[][] actualFloor;
     private static Floor[][] actualOverlay;
+
+    // Are we currently in the process of updating the dead zone?
+    private static boolean updatingDeadZone = false;
+    private static int updateIndex = 0;
+    // How many ticks should writing the dead zone be staggered across?
+    private static final int UPDATE_DIVISIONS = 1000;
+
+    /**
+     * This should be called once every tick.
+     */
+    public static void update() {
+        if (updatingDeadZone) {
+            long beginTime = System.currentTimeMillis();
+
+            int i = updateIndex;
+            int x = i % world.width();
+            int y = i / world.width();
+            while (x < world.width() && y < world.height()) {
+                Block floor = world.floor(x, y);
+                Block desiredFloor;
+                Block desiredOverlay;
+                if (getDeadZone(new Point2(x, y))) {
+                    desiredFloor = Constants.DEAD_ZONE_FILLER_FLOOR;
+                    desiredOverlay = Blocks.air;
+                } else {
+                    desiredFloor = actualFloor[x][y];
+                    desiredOverlay = actualOverlay[x][y];
+                }
+                if (floor != desiredFloor) {
+                    world.tile(x, y).setFloorNet(desiredFloor, desiredOverlay);
+                }
+
+                i += UPDATE_DIVISIONS;
+                x = i % world.width();
+                y = i / world.width();
+            }
+
+            updateIndex ++;
+            if (updateIndex == UPDATE_DIVISIONS) {
+                updatingDeadZone = false;
+            }
+
+            long endTime = System.currentTimeMillis();
+            int elapsed = (int) (endTime - beginTime);
+            System.out.println(elapsed + " ms to update one deadzone cycle (" + (elapsed / (1000f / 60f)) + " ticks at 60TPS)");
+        }
+    }
+
+    public static boolean isUpdatingDeadZone() {
+        return updatingDeadZone;
+    }
 
     public static void initCache() {
         deadZoneCache = new boolean[world.width()][world.height()];
@@ -112,26 +164,12 @@ public final class DeadZone {
     }
 
     /**
-     * Rewrites the entire map floor.
+     * Rewrites the entire map floor. Doesn't find new values, only reloads from memory.
      */
     public static void reloadFloor() {
-        for (int x = 0; x < world.width(); x ++) {
-            for (int y = 0; y < world.height(); y++) {
-                Block floor = world.floor(x, y);
-                Block desiredFloor;
-                Block desiredOverlay;
-                if (getDeadZone(new Point2(x, y))) {
-                    desiredFloor = Constants.DEAD_ZONE_FILLER_FLOOR;
-                    desiredOverlay = Blocks.air;
-                } else {
-                    desiredFloor = actualFloor[x][y];
-                    desiredOverlay = actualOverlay[x][y];
-                }
-                if (floor != desiredFloor) {
-                    world.tile(x, y).setFloorNet(desiredFloor, desiredOverlay);
-                }
-            }
-        }
+        // Starts the reloading process
+        updateIndex = 0;
+        updatingDeadZone = true;
     }
 
     public static void reloadCore(CoreBlock.CoreBuild core) {
