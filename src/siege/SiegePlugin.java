@@ -176,6 +176,7 @@ public final class SiegePlugin extends Plugin {
     // Manages constant processes that happen always
     private static void alwaysUpdate() {
         checkTeams();
+        fixUnits();
 
         if (Keep.keepExists() && Core.graphics.getFrameId() % 10 == 0) {
             displayKeepFx();
@@ -464,6 +465,16 @@ public final class SiegePlugin extends Plugin {
 
             if (Gamedata.raiderTeams.isEmpty()) {
                 endGame(winnerCode);
+            }
+        }
+    }
+
+    // Workaround for core unit spawning - kills them all
+    // TODO find a better way PLEASE
+    private static void fixUnits() {
+        for (Unit unit : Groups.unit) {
+            if (Constants.CORE_UNITS.contains(unit.type) && !unit.isPlayer()) {
+                unit.kill();
             }
         }
     }
