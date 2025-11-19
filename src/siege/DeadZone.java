@@ -59,6 +59,7 @@ public final class DeadZone {
      * @return Whether the tile is in the dead zone
      */
     public static boolean getDeadZone(Tile tile) {
+        if (tile == null) return true;
         return deadZoneCache[tile.x][tile.y];
     }
 
@@ -68,6 +69,8 @@ public final class DeadZone {
      * @return Whether the tile is in the dead zone
      */
     public static boolean getDeadZone(Point2 point) {
+        if (point == null) return true;
+        if (point.x < 0 || point.y < 0 || point.x >= deadZoneCache.length || point.y >= deadZoneCache[0].length) return true;
         return deadZoneCache[point.x][point.y];
     }
 
