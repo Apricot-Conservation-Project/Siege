@@ -573,8 +573,7 @@ public final class SiegePlugin extends Plugin {
     }
 
     private static void siegeHelp(Player executor) {
-        executor.sendMessage("Not implemented");
-        // TODO write a brief text to explain siege
+        executor.sendMessage("[orange]Siege[accent] is [purple]ACP[]'s second gamemode. Siege is a battle between a central team - the [green]Citadel[] - and a number of outer teams - the [red]Raiders[] - for dominance.\nMost of the map is covered in the Dead Zone. This is a region that very quickly kills any non-core units that attempt to navigate it. Every core creates a protective bubble around itself, and higher tier cores are able to protect more. Building cores starts off cheap, but gets more expensive with each core.\nTo make a core, a vault has to be given phase fabric and thorium, then clicked. Build more cores and expand outward to reach other teams and win!\nRaiders are encouraged to make multiple teams. During the first " + Mathf.round(Constants.GUARANTEED_KEEP_TIME_SECONDS / 60f) + " minutes of the game, or multiple raider teams are present, the center of the map becomes the Keep, a region that makes Citadel blocks invincible, but prevents them from building turrets in the area. Raiders can kill their raider opponents in order to dissolve the Keep, attack the Citadel next, and hopefully, win!");
     }
 
 
