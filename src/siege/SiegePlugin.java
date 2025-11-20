@@ -58,7 +58,7 @@ public final class SiegePlugin extends Plugin {
                 boolean blockBlue = action.player.team() == Team.blue;
                 // Trying to build in the dead zone
                 // - This still works even before deadzone is written because the cache is always up to date
-                boolean blockDeadZone = DeadZone.insideDeadZone(action.tile.x, action.tile.y, action.block);
+                boolean blockDeadZone = DeadZone.insideDeadZone(action.tile.x, action.tile.y, action.block, DeadZone.isUpdatingDeadZone());
                 // Trying to build a turret inside of the keep
                 boolean blockKeepTurrets = action.player.team() == Team.green && Keep.keepExists() && Constants.TURRET_BLOCKS.contains(action.block) && Keep.inKeep(action.tile.x, action.tile.y, action.block);
                 // Trying to build a block that's currently banned for your team

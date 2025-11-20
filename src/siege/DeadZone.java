@@ -192,9 +192,10 @@ public final class DeadZone {
      * @param buildingX The x position of the building
      * @param buildingY The y position of the building
      * @param block The type of block that the building is
+     * @param hard Whether to 'hard' get - and force a reload of - the building tiles
      * @return Whether the building would be in the dead zone
      */
-    public static boolean insideDeadZone(int buildingX, int buildingY, Block block) {
+    public static boolean insideDeadZone(int buildingX, int buildingY, Block block, boolean hard) {
         float middleX = buildingX;
         float middleY = buildingY;
         if (block.size % 2 == 0) {
@@ -207,8 +208,14 @@ public final class DeadZone {
         int highY = (int)(middleY + block.size / 2f);
         for (int x = lowX; x <= highX; x ++) {
             for (int y = lowY; y <= highY; y ++) {
-                if (getDeadZone(new Point2(x, y))) {
-                    return true;
+                if (hard) {
+                    if (hardGetDeadZone(new Point2(x, y))) {
+                        return true;
+                    }
+                } else {
+                    if (getDeadZone(new Point2(x, y))) {
+                        return true;
+                    }
                 }
             }
         }
@@ -218,9 +225,10 @@ public final class DeadZone {
     /**
      * Checks if a building is inside the dead zone. Any portion being over the dead zone counts.
      * @param building The building to query
+     * @param hard Whether to 'hard' get - and force a reload of - the building tiles
      * @return Whether the building is in the dead zone
      */
-    public static boolean insideDeadZone(Building building) {
-        return insideDeadZone(building.tile.x, building.tile.y, building.block);
+    public static boolean insideDeadZone(Building building, boolean hard) {
+        return insideDeadZone(building.tile.x, building.tile.y, building.block, hard);
     }
 }
