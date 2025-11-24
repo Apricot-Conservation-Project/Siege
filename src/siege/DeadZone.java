@@ -31,8 +31,6 @@ public final class DeadZone {
      */
     public static void update() {
         if (updatingDeadZone) {
-            long beginTime = System.currentTimeMillis();
-
             int i = updateIndex;
             int x = i % world.width();
             int y = i / world.width();
@@ -60,10 +58,6 @@ public final class DeadZone {
             if (updateIndex == UPDATE_DIVISIONS) {
                 updatingDeadZone = false;
             }
-
-            long endTime = System.currentTimeMillis();
-            int elapsed = (int) (endTime - beginTime);
-            System.out.println(elapsed + " ms to update one deadzone cycle (" + (elapsed / (1000f / 60f)) + " ticks at 60TPS)");
         }
     }
 
