@@ -13,6 +13,7 @@ import mindustry.type.ItemSeq;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
 import mindustry.world.Block;
+import mindustry.world.blocks.environment.Floor;
 
 import java.util.List;
 
@@ -26,6 +27,8 @@ public final class Constants {
     public static final Block DEAD_ZONE_FILLER_FLOOR = Blocks.denseRedStone;
 
     public static final Seq<Block> CORE_TYPES = new Seq<>(new Block[]{Blocks.coreShard, Blocks.coreFoundation, Blocks.coreNucleus});
+
+    public static final Seq<Floor> NO_CORE_FLOORS = new Seq<>(new Floor[]{Blocks.grass.asFloor(), Blocks.slag.asFloor()});
 
     public static final float CORE_PLACEMENT_MIN_DISTANCE = 120f;
     public static final float CORE_PLACEMENT_CITADEL_MIN_DISTANCE = 225f;
