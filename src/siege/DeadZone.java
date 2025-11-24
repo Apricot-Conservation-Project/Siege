@@ -36,6 +36,10 @@ public final class DeadZone {
             int y = i / world.width();
             while (x < world.width() && y < world.height()) {
                 Block floor = world.floor(x, y);
+                if (floor == Blocks.grass.asFloor()) {
+                    // No dead zone on grass :)
+                    deadZoneCache[x][y] = false;
+                }
                 Block desiredFloor;
                 Block desiredOverlay;
                 if (getDeadZone(new Point2(x, y))) {
@@ -128,6 +132,10 @@ public final class DeadZone {
      * @return Whether the tile is in the dead zone
      */
     public static boolean hardGetDeadZone(Point2 tile) {
+        if (world.tile(tile.x, tile.y).floor() == Blocks.grass.asFloor()) {
+            return false;
+        }
+
         CoreBlock.CoreBuild[] cores = Gamedata.getAllCores();
 
         boolean result = true;
