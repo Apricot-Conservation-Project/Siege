@@ -130,6 +130,28 @@ public final class SiegePlugin extends Plugin {
         });
 
         Events.on(EventType.TapEvent.class, event -> {
+            PersistentPlayer persistentPlayer = PersistentPlayer.fromPlayer(event.player);
+            switch (persistentPlayer.clickAction) {
+                case None -> {
+                    break;
+                }
+                case Destroy -> {
+                    if (event.tile.build != null && event.tile.build.team == event.player.team()) {
+                        event.tile.build.kill();
+                    }
+                    persistentPlayer.clickAction = ClickAction.None;
+                    return;
+                }
+                case Uncore -> {
+                    if (event.tile.build != null && event.tile.build.block instanceof CoreBlock && event.tile.build.team == event.player.team()) {
+                        coreDestroy(event.tile.build);
+                        event.tile.build.tile.setNet(Blocks.air);
+                    }
+                    persistentPlayer.clickAction = ClickAction.None;
+                    return;
+                }
+            }
+
             if (event.tile.build != null && event.tile.build.block == Blocks.vault) {
                 attemptCore(event.tile.build, event.player);
             }
@@ -487,6 +509,8 @@ public final class SiegePlugin extends Plugin {
     public void registerClientCommands(CommandHandler handler) {
         RaiderTeam.Commands.registerCommands(handler);
         handler.<Player>register("siege", "Explain the Siege gamemode", (args, player) -> siegeHelp(player));
+        handler.<Player>register("uncore", "Remove a core without collateral damage", (args, player) -> uncore(player));
+        handler.<Player>register("destroy", "Destroy a tile from your team", (args, player) -> destroy(player));
         handler.<Player>register("reset", "debug reset game", (args, player) -> {
             System.out.println("SiegePlugin reset");
             Gamedata.reset();
@@ -574,6 +598,14 @@ public final class SiegePlugin extends Plugin {
 
     private static void siegeHelp(Player executor) {
         executor.sendMessage("[orange]Siege[accent] is [purple]ACP[]'s second gamemode. Siege is a battle between a central team - the [green]Citadel[] - and a number of outer teams - the [red]Raiders[] - for dominance.\nMost of the map is covered in the Dead Zone. This is a region that very quickly kills any non-core units that attempt to navigate it. Every core creates a protective bubble around itself, and higher tier cores are able to protect more. Building cores starts off cheap, but gets more expensive with each core.\nTo make a core, a vault has to be given phase fabric and thorium, then clicked. Build more cores and expand outward to reach other teams and win!\nRaiders are encouraged to make multiple teams. During the first " + Mathf.round(Constants.GUARANTEED_KEEP_TIME_SECONDS / 60f) + " minutes of the game, or multiple raider teams are present, the center of the map becomes the Keep, a region that makes Citadel blocks invincible, but prevents them from building turrets in the area. Raiders can kill their raider opponents in order to dissolve the Keep, attack the Citadel next, and hopefully, win!");
+    }
+
+    private static void uncore(Player executor) {
+        PersistentPlayer.fromPlayer(executor).clickAction = ClickAction.Uncore;
+    }
+
+    private static void destroy(Player executor) {
+        PersistentPlayer.fromPlayer(executor).clickAction = ClickAction.Destroy;
     }
 
 

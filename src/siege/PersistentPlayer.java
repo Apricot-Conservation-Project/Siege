@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class PersistentPlayer {
+    public ClickAction clickAction;
     public boolean online;
     public long lastSeen;
     public long lastActed;
