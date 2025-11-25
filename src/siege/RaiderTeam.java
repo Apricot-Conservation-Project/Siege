@@ -433,7 +433,7 @@ public class RaiderTeam {
          * @param handler The CommandHandler passed from the Plugin superclass
          */
         public static void registerCommands(CommandHandler handler) {
-            handler.register("team", "[command] [argument]", "Run /team to list team commands.", Commands::teamCommand);
+            handler.register("team", "[command] [argument]", "Run /team to list team commands and get info.", Commands::teamCommand);
         }
 
         /**

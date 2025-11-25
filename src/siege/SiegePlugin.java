@@ -511,33 +511,39 @@ public final class SiegePlugin extends Plugin {
     }
 
     public static boolean stopteamfix = false;
+    private static boolean debugMode = false;
 
     @Override
     public void registerClientCommands(CommandHandler handler) {
-        RaiderTeam.Commands.registerCommands(handler);
         handler.<Player>register("siege", "Explain the Siege gamemode", (args, player) -> siegeHelp(player));
         handler.<Player>register("uncore", "Remove a core without collateral damage", (args, player) -> uncore(player));
         handler.<Player>register("destroy", "Destroy a tile from your team", (args, player) -> destroy(player));
-        handler.<Player>register("reset", "debug reset game", (args, player) -> {
-            System.out.println("SiegePlugin reset");
-            Gamedata.reset();
-            Setup.reset();
-        });
-        handler.<Player>register("wincitadel", "debug force citadel win", (args, player) -> {
-            System.out.println("Citadel win forced");
-            for (RaiderTeam team : Gamedata.raiderTeams) {
-                for (CoreBlock.CoreBuild core : team.mindustryTeam.cores()) {
-                    core.tile.setAir();
-                }
+        RaiderTeam.Commands.registerCommands(handler);
+
+        // DEBUG COMMANDS
+
+        handler.<Player>register("debug", "Toggle whether debug commands are enabled", (args, player) -> {
+            debugMode = !debugMode;
+            if (debugMode) {
+                announce("[accent]Debug commands are enabled.");
+            } else {
+                announce("[accent]Debug commands are disabled.");
             }
         });
-        handler.<Player>register("winraider", "debug force raider win", (args, player) -> {
-            System.out.println("Raider win forced");
-            for (CoreBlock.CoreBuild core : Team.green.cores()) {
-                core.tile.setAir();
+
+        handler.<Player>register("endgame", "DEBUG - Instantly ends the game", (args, player) -> {
+            if (!debugMode) {
+                player.sendMessage("[red]Debug commands are not enabled.");
+                return;
             }
+            System.out.println("Game prematurely ended by " + player.name + ", uuid " + player.uuid() + ", ip " + player.ip());
+            endGame(0);
         });
-        handler.<Player>register("money", "free money", (args, player) -> {
+        handler.<Player>register("money", "DEBUG - Give your team 100k of each item", (args, player) -> {
+            if (!debugMode) {
+                player.sendMessage("[red]Debug commands are not enabled.");
+                return;
+            }
             Team team = player.team();
             team.items().add(new ItemSeq(ItemStack.list(
                     Items.copper, 100000,
@@ -558,25 +564,30 @@ public final class SiegePlugin extends Plugin {
                     Items.pyratite, 100000
             )));
         });
-        handler.<Player>register("core", "place a core at your location", (args, player) -> {
+        handler.<Player>register("core", "DEBUG - Instantly place a core at your location.", (args, player) -> {
+            if (!debugMode) {
+                player.sendMessage("[red]Debug commands are not enabled.");
+                return;
+            }
             Team team = player.team();
             Tile tile = Vars.world.tile(player.tileX(), player.tileY());
             tile.setNet(Blocks.coreShard, team, 0);
             DeadZone.reloadCore((CoreBlock.CoreBuild) tile.build);
         });
-        handler.<Player>register("stopteamfix", "meow", (args, player) -> {
-            stopteamfix = true;
+        handler.<Player>register("toggleteamfix", "DEBUG - Toggles whether the checkTeams method can run.", (args, player) -> {
+            if (!debugMode) {
+                player.sendMessage("[red]Debug commands are not enabled.");
+                return;
+            }
+            stopteamfix = !stopteamfix;
+            player.sendMessage("[accent]Variable stopteamfix set to " + stopteamfix);
         });
-        handler.<Player>register("startteamfix", "meow", (args, player) -> {
-            stopteamfix = false;
-        });
-        handler.register("datadump", "yowch", (args, player) -> {
+        handler.<Player>register("datadump", "DEBUG - Prints information about internal game variables", (args, player) -> {
+            if (!debugMode) {
+                player.sendMessage("[red]Debug commands are not enabled.");
+                return;
+            }
             Gamedata.dataDump();
-        });
-
-        handler.register("test", "test", (args, player) -> {
-            Events.fire(new EventType.GameOverEvent(Team.derelict));
-            //Call.
         });
     }
 

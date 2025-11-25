@@ -104,16 +104,16 @@ public final class Gamedata {
     }
 
     public static void dataDump() {
-        System.out.println("\nGamedata and Setup dump\n");
-        System.out.println("deadRaiderTeams: " + deadRaiderTeams.toString());
-        System.out.println("raiderTeams: " + raiderTeams.toString());
-        System.out.println("startTime: " + startTime);
-        System.out.println("gameStarted: " + gameStarted);
-        System.out.println("gameOver: " + gameOver);
-        System.out.println("keep exists: " + Keep.keepExists());
-        System.out.println("elapsedTimeSeconds(): " + elapsedTimeSeconds());
-        System.out.println("--- Setup ---");
+        SiegePlugin.announce("\nGamedata and Setup dump\n");
+        SiegePlugin.announce("deadRaiderTeams: " + deadRaiderTeams.toString());
+        SiegePlugin.announce("raiderTeams: " + raiderTeams.toString());
+        SiegePlugin.announce("startTime: " + startTime);
+        SiegePlugin.announce("gameStarted: " + gameStarted);
+        SiegePlugin.announce("gameOver: " + gameOver);
+        SiegePlugin.announce("keep exists: " + Keep.keepExists());
+        SiegePlugin.announce("elapsedTimeSeconds(): " + elapsedTimeSeconds());
+        SiegePlugin.announce("--- Setup ---");
         Setup.dataDump();
-        System.out.println("\n");
+        SiegePlugin.announce("\n");
     }
 }

@@ -183,7 +183,7 @@ public final class Setup {
     }
 
     public static void dataDump() {
-        System.out.println("nextTimeReminder: " + nextTimeReminder);
-        System.out.println("changedToCorePlacement: " + changedToCorePlacement);
+        SiegePlugin.announce("nextTimeReminder: " + nextTimeReminder);
+        SiegePlugin.announce("changedToCorePlacement: " + changedToCorePlacement);
     }
 }
