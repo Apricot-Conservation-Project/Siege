@@ -106,6 +106,7 @@ public final class RuleSetter {
         rules.coreIncinerates = true;
         rules.fire = false;
         rules.hideBannedBlocks = true;
+        rules.waves = false;
 
         for (Team team : Team.all) {
             rules.teams.get(team).rtsAi = true;
