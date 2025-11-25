@@ -8,7 +8,6 @@ import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.content.UnitTypes;
 import mindustry.entities.Effect;
-import mindustry.gen.Unit;
 import mindustry.type.ItemSeq;
 import mindustry.type.ItemStack;
 import mindustry.type.UnitType;
@@ -41,11 +40,11 @@ public final class Constants {
     public static final int VOTEKICK_LENGTH_PREGAME_MS = 30 * 1000;
     public static final int VOTEKICK_LENGTH_MS = 90 * 1000;
 
-    public static final int TEAM_SETUP_TIME_SECONDS = 20;
-    public static final int CORE_PLACEMENT_TIME_SECONDS = 10;
+    public static final int TEAM_SETUP_TIME_SECONDS = 120;
+    public static final int CORE_PLACEMENT_TIME_SECONDS = 90;
     public static final int SETUP_TIME_SECONDS = TEAM_SETUP_TIME_SECONDS + CORE_PLACEMENT_TIME_SECONDS;
 
-    public static final int GUARANTEED_KEEP_TIME_SECONDS = 10 * 60;
+    public static final int GUARANTEED_KEEP_TIME_SECONDS = 15 * 60;
     public static final int KEEP_RADIUS = 120;
     public static final Effect KEEP_EFFECT = Fx.hitSquaresColor;
     public static final float DEAD_ZONE_DAMAGE_CONSTANT_TICK = 55f / 60f; // Absolute damage every tick
