@@ -2,7 +2,6 @@ package siege;
 
 import arc.math.Mathf;
 import arc.math.geom.Point2;
-import arc.util.Time;
 import mindustry.content.Blocks;
 import mindustry.gen.Building;
 import mindustry.world.Block;
@@ -84,8 +83,8 @@ public final class DeadZone {
 
     /**
      * Get the radius that the given core reveals around the dead zone
-     * @param core
-     * @return
+     * @param core The core in question
+     * @return The radius that the given core type should clear around itself of the deadzone
      */
     public static float getCoreSafetyRadius(Block core) {
         if (core == Blocks.coreShard) {

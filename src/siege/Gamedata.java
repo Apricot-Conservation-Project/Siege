@@ -1,19 +1,11 @@
 package siege;
 
-import arc.math.Mathf;
-import arc.math.geom.Point2;
-import mindustry.content.Blocks;
 import mindustry.game.Team;
-import mindustry.gen.Building;
 import mindustry.world.Block;
-import mindustry.world.Tile;
-import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.storage.CoreBlock;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static mindustry.Vars.world;
 
 public final class Gamedata {
     public static List<RaiderTeam> deadRaiderTeams = new ArrayList<>();
@@ -22,7 +14,6 @@ public final class Gamedata {
     public static boolean gameStarted = false; // Owned by Setup
     public static boolean gameOver = false;
     //public int mapIndex;
-    public static DeadZone deadZone;
 
     public static void reset() {
         startTime = System.currentTimeMillis() + 1000 * Constants.SETUP_TIME_SECONDS;

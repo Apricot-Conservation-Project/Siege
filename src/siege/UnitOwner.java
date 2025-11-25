@@ -11,7 +11,7 @@ public class UnitOwner {
     private float trueMaxHealth;
     private boolean wasInKeep;
 
-    private static Seq<UnitOwner> unitOwners = new Seq<>();
+    private static final Seq<UnitOwner> unitOwners = new Seq<>();
     private static long previousDeadZoneCheck = 0L;
 
     private UnitOwner(Unit unit) {

@@ -1,19 +1,15 @@
 package siege;
 
 import arc.*;
-import arc.func.Cons;
 import arc.graphics.Color;
 import arc.math.Mathf;
 import arc.math.geom.Point2;
-import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.*;
 import mindustry.Vars;
 import mindustry.content.Blocks;
-import mindustry.content.Fx;
 import mindustry.content.Items;
 import mindustry.game.EventType;
-import mindustry.game.Rules;
 import mindustry.game.Team;
 import mindustry.gen.*;
 import mindustry.mod.*;
@@ -25,7 +21,6 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.modules.ItemModule;
 
-import java.awt.desktop.SystemEventListener;
 import java.util.random.RandomGenerator;
 
 public final class SiegePlugin extends Plugin {
@@ -134,9 +129,6 @@ public final class SiegePlugin extends Plugin {
         Events.on(EventType.TapEvent.class, event -> {
             PersistentPlayer persistentPlayer = PersistentPlayer.fromPlayer(event.player);
             switch (persistentPlayer.clickAction) {
-                case None -> {
-                    break;
-                }
                 case Destroy -> {
                     if (event.tile.build != null && event.tile.build.team == event.player.team()) {
                         event.tile.build.kill();
@@ -225,6 +217,10 @@ public final class SiegePlugin extends Plugin {
             Keep.keepDissolvedListener();
         }
         Keep.keepExisted = Keep.keepExists();
+
+        for (RaiderTeam raiderTeam : Gamedata.raiderTeams) {
+            raiderTeam.update();
+        }
 
         if (Team.green.cores().size == 0) {
             if (Gamedata.raiderTeams.size() == 1) {
@@ -639,7 +635,7 @@ public final class SiegePlugin extends Plugin {
         if (minutesStr.length() == 1) minutesStr = "0" + minutesStr;
         String secondsStr = String.valueOf(secondsF);
         if (secondsStr.length() == 1) secondsStr = "0" + secondsStr;
-        String timeString = hoursF + ":" + minutesF + ":" + secondsF + " since game start.";
+        String timeString = hoursStr + ":" + minutesStr + ":" + secondsStr + " since game start.";
         switch (Gamedata.getGameState()) {
             case TeamSetup -> executor.sendMessage("[#6080FF]Team setup is ongoing.");
             case CorePlacement -> executor.sendMessage("[#6080FF]Core placement is ongoing.");

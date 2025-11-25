@@ -5,14 +5,11 @@ import arc.struct.Seq;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
 import mindustry.content.UnitTypes;
-import mindustry.core.GameState;
 import mindustry.game.Rules;
 import mindustry.game.Team;
-import mindustry.game.Teams;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
-import mindustry.gen.Unit;
 import mindustry.type.UnitType;
 import mindustry.world.Block;
 import mindustry.world.blocks.defense.turrets.ItemTurret;
@@ -73,7 +70,7 @@ public final class RuleSetter {
 
     /**
      * Updates the rules a player abides by
-     * @param player
+     * @param player The player to send updated rules to
      */
     public static void updatePlayerRules(Player player) {
         Rules tempRules = RuleSetter.rules.copy();
