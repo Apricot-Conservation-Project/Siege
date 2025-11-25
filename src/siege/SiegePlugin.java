@@ -192,24 +192,26 @@ public final class SiegePlugin extends Plugin {
      * Delegates to sub-functions for various game stages
      */
     private static void update() {
+        int code = 0;
         try {
-            RuleSetter.update();
-            DeadZone.update();
+            RuleSetter.update(); code = 101;
+            DeadZone.update(); code = 102;
+            UnitOwner.update(); code = 103;
 
             if (!Gamedata.gameOver) {
-                alwaysUpdate();
+                alwaysUpdate(); code = 201;
 
                 if (!Gamedata.gameStarted) {
-                    Setup.update();
+                    Setup.update(); code = 301;
                 } else if (!Gamedata.gameOver) {
-                    gameUpdate();
+                    gameUpdate(); code = 401;
                 }
             }
         }
         catch (Exception e) {
             e.printStackTrace();
             Gamedata.dataDump();
-            announce("[red]Exception thrown during tick update");
+            announce("[red]Exception thrown during tick update. Error code " + code);
         }
     }
 
