@@ -103,9 +103,6 @@ public final class Setup {
     public static void beginGame() {
         Gamedata.gameStarted = true;
 
-        SiegePlugin.PlayersLastSeen = System.currentTimeMillis();
-        SiegePlugin.PlayersLastActive = System.currentTimeMillis();
-
         // Add raider team cores
         // Teams can be removed here if they have no players.
         RaiderTeam[] teams = Gamedata.raiderTeams.toArray(new RaiderTeam[0]);
@@ -151,6 +148,14 @@ public final class Setup {
             Tile tile = world.tile(corePoint.x, corePoint.y); // Subtract 1 because of how foundations 'center' tile are measured
             tile.setNet(Blocks.coreFoundation, team.mindustryTeam, 0);
             state.teams.registerCore((CoreBlock.CoreBuild) tile.build);
+        }
+
+        // Everyone starts with a clean slate
+        SiegePlugin.PlayersLastSeen = System.currentTimeMillis();
+        SiegePlugin.PlayersLastActive = System.currentTimeMillis();
+        for (PersistentPlayer player : PersistentPlayer.players) {
+            player.lastSeen = System.currentTimeMillis();
+            player.lastActed = System.currentTimeMillis();
         }
 
         // Give team loadouts
