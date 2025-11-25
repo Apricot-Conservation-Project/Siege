@@ -518,6 +518,7 @@ public final class SiegePlugin extends Plugin {
         handler.<Player>register("siege", "Explain the Siege gamemode", (args, player) -> siegeHelp(player));
         handler.<Player>register("uncore", "Remove a core without collateral damage", (args, player) -> uncore(player));
         handler.<Player>register("destroy", "Destroy a tile from your team", (args, player) -> destroy(player));
+        handler.<Player>register("status", "Readout the status of the current game", (args, player) -> status(player));
         RaiderTeam.Commands.registerCommands(handler);
 
         // DEBUG COMMANDS
@@ -624,6 +625,31 @@ public final class SiegePlugin extends Plugin {
 
     private static void destroy(Player executor) {
         PersistentPlayer.fromPlayer(executor).clickAction = ClickAction.Destroy;
+    }
+
+    private static void status(Player executor) {
+        int seconds = (int) Gamedata.elapsedTimeSeconds();
+        int minutes = seconds / 60;
+        int hoursF = minutes / 60;
+        int minutesF = minutes - hoursF * 60;
+        int secondsF = seconds - minutesF * 60 - hoursF * 60 * 60;
+        String hoursStr = String.valueOf(hoursF);
+        if (hoursStr.length() == 1) hoursStr = "0" + hoursStr;
+        String minutesStr = String.valueOf(minutesF);
+        if (minutesStr.length() == 1) minutesStr = "0" + minutesStr;
+        String secondsStr = String.valueOf(secondsF);
+        if (secondsStr.length() == 1) secondsStr = "0" + secondsStr;
+        String timeString = hoursF + ":" + minutesF + ":" + secondsF + " since game start.";
+        switch (Gamedata.getGameState()) {
+            case TeamSetup -> executor.sendMessage("[#6080FF]Team setup is ongoing.");
+            case CorePlacement -> executor.sendMessage("[#6080FF]Core placement is ongoing.");
+            case MidgameNoKeep -> executor.sendMessage("[#6080FF]The game is ongoing. The keep has dissolved. " + timeString);
+            case MidgameYesKeep -> executor.sendMessage("[#6080FF]The game is ongoing. The keep is active. " + timeString);
+            case GameOver -> executor.sendMessage("[#6080FF]The game is over. " + timeString);
+        }
+        executor.sendMessage("[#6080FF]" + Groups.player.size() + " players online. " + Gamedata.raiderTeams.size() + " raider team(s) are alive.");
+        executor.sendMessage("[#6080FF]" + Gamedata.getAllCores().length + " core(s) and " + Groups.unit.size() + " unit(s) are alive.");
+        executor.sendMessage("[#6080FF]" + Core.graphics.getFramesPerSecond() + " TPS on " + Core.app.getJavaHeap() / 1024 / 1024 + " MB of memory");
     }
 
 
