@@ -199,7 +199,11 @@ public final class SiegePlugin extends Plugin {
             UnitOwner.update(); code = 103;
 
             if (!Gamedata.gameOver) {
-                alwaysUpdate(); code = 201;
+                checkTeams(); code = 201;
+                fixUnits(); code = 202;
+                if (Keep.keepExists() && Core.graphics.getFrameId() % 10 == 0) {
+                    displayKeepFx(); code = 203;
+                }
 
                 if (!Gamedata.gameStarted) {
                     Setup.update(); code = 301;
@@ -215,19 +219,8 @@ public final class SiegePlugin extends Plugin {
         }
     }
 
-    // Manages constant processes that happen always
-    private static void alwaysUpdate() {
-        checkTeams();
-        fixUnits();
-
-        if (Keep.keepExists() && Core.graphics.getFrameId() % 10 == 0) {
-            displayKeepFx();
-        }
-    }
-
     // Manages constant processes during the course of a game (does not run during setup or during game over)
     private static void gameUpdate() {
-        deadZoneDamage();
         if (Keep.keepExisted && !Keep.keepExists()) {
             Keep.keepDissolvedListener();
         }
@@ -427,27 +420,6 @@ public final class SiegePlugin extends Plugin {
             player.sendMessage("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. You have joined after teams were determined, meaning you are on the Citadel team. The game will begin in " + (-Gamedata.elapsedTimeSeconds()) + " seconds. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
         } else {
             player.sendMessage("[sky]Welcome to Siege! Siege is developed and hosted by the Apricot Conservation Project. Team setup is currently ongoing, if you would like to create or join a Raider team, run /team. Team setup will end in " + (-Gamedata.elapsedTimeSeconds() - Constants.CORE_PLACEMENT_TIME_SECONDS) + " seconds. To learn more about the Siege gamemode, run /siege. Have fun, and good luck!");
-        }
-    }
-
-    private static long previousDeadZoneCheck = 0L;
-    // Inflicts a tick of dead zone damage to all units within it
-    private static void deadZoneDamage() {
-        if (previousDeadZoneCheck == 0L) {
-            previousDeadZoneCheck = System.currentTimeMillis() - (1000 / 60);
-        }
-        float elapsedTimeSeconds = (System.currentTimeMillis() - previousDeadZoneCheck) / 1000f;
-        float elapsedTimeTicks = elapsedTimeSeconds * 60f;
-        float constantDamage = Constants.DEAD_ZONE_DAMAGE_CONSTANT_TICK * elapsedTimeTicks;
-        float percentDamage = Constants.DEAD_ZONE_DAMAGE_PERCENT_TICK * elapsedTimeTicks;
-        previousDeadZoneCheck = System.currentTimeMillis();
-        for (Unit unit : Groups.unit) {
-            if (DeadZone.getDeadZone(unit.tileOn())  &&  !Constants.DEAD_ZONE_IMMUNE_TYPES.contains(unit.type)) {
-                unit.health -= constantDamage + unit.maxHealth * percentDamage;
-                if (unit.health <= 0.0f && !unit.dead) {
-                    unit.kill();
-                }
-            }
         }
     }
 
