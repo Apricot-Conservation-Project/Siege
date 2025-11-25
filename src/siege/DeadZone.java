@@ -204,10 +204,11 @@ public final class DeadZone {
             middleX += 0.5f;
             middleY += 0.5f;
         }
-        int lowX = (int)(middleX - block.size / 2f);
-        int lowY = (int)(middleY - block.size / 2f);
-        int highX = (int)(middleX + block.size / 2f);
-        int highY = (int)(middleY + block.size / 2f);
+        float diff = (block.size - 1) / 2f;
+        int lowX = (int)(middleX - diff);
+        int lowY = (int)(middleY - diff);
+        int highX = (int)(middleX + diff);
+        int highY = (int)(middleY + diff);
         for (int x = lowX; x <= highX; x ++) {
             for (int y = lowY; y <= highY; y ++) {
                 if (hard) {
