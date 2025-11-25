@@ -7,6 +7,7 @@ import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.gen.Groups;
 import mindustry.world.Block;
+import mindustry.world.Tile;
 
 import static mindustry.Vars.world;
 
@@ -41,6 +42,15 @@ public class Keep {
      */
     public static boolean keepExists() {
         return Gamedata.raiderTeams.size() > 1 || Gamedata.elapsedTimeSeconds() < Constants.GUARANTEED_KEEP_TIME_SECONDS;
+    }
+
+    /**
+     * Checks if a tile is in the keep. Ignores whether the keep has dissolved or not.
+     * @param tile The location to query
+     * @return Whether that location could be in the keep
+     */
+    public static boolean inKeep(Tile tile) {
+        return inKeep(new Point2(tile.x, tile.y));
     }
 
     /**

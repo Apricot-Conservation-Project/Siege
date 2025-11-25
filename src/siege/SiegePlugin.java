@@ -25,6 +25,7 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.storage.CoreBlock;
 import mindustry.world.modules.ItemModule;
 
+import java.awt.desktop.SystemEventListener;
 import java.util.random.RandomGenerator;
 
 public final class SiegePlugin extends Plugin {
@@ -171,7 +172,18 @@ public final class SiegePlugin extends Plugin {
                 event.unit.kill();
                 // Call.unitDestroy(event.unit.id); TODO is this necessary for synchronization?
                 announce("[orange]The unit built at [accent]" + (int)event.unit.x + ", " + (int)event.unit.y + "[] is not allowed at this time and has been killed. Run the [accent]/siege[] command to learn more.");
+                return;
             }
+
+            UnitOwner.fromUnit(event.unit); // Register the unit
+            // This doesn't seem to register core units.
+            // A workaround was placed in UnitOwner to automatically scan and update every unit
+            // But it would be more efficient to only have to pull from a seq of UnitOwners rather than re-generate all of them from Groups.unit
+            // TODO: Find a way to register every unit, including core units
+        });
+
+        Events.on(EventType.UnitDestroyEvent.class, event -> {
+            UnitOwner.deregister(event.unit); // Deregister the unit
         });
     }
 
