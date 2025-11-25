@@ -4,6 +4,7 @@ import arc.*;
 import arc.func.Cons;
 import arc.graphics.Color;
 import arc.math.Mathf;
+import arc.math.geom.Point2;
 import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.*;
@@ -153,7 +154,10 @@ public final class SiegePlugin extends Plugin {
             }
 
             if (event.tile.build != null && event.tile.build.block == Blocks.vault) {
-                attemptCore(event.tile.build, event.player);
+                if (System.currentTimeMillis() > persistentPlayer.lastAttemptedCore + 200) {
+                    attemptCore(event.tile.build, event.player);
+                }
+                persistentPlayer.lastAttemptedCore = System.currentTimeMillis();
             }
         });
 
@@ -263,6 +267,23 @@ public final class SiegePlugin extends Plugin {
      * @return Whether the vault was converted into a core
      */
     public static boolean attemptCore(Building vault, Player executor) {
+        int lowX = vault.tile.x - 1;
+        int lowY = vault.tile.y - 1;
+        int highX = vault.tile.x + 1;
+        int highY = vault.tile.y + 1;
+        for (int x = lowX; x <= highX; x ++) {
+            for (int y = lowY; y <= highY; y ++) {
+                if (DeadZone.hardGetDeadZone(new Point2(x, y))) {
+                    executor.sendMessage("[red]Could not build core. This vault is within the dead zone.");
+                    return false;
+                }
+                if (Vars.world.tile(x, y).floor() == Blocks.grass.asFloor()) {
+                    executor.sendMessage("[red]Could not build core. Cores cannot be built on guaranteed safe regions.");
+                    return false;
+                }
+            }
+        }
+
         Team team = vault.team();
         ItemModule vaultContents = vault.items.copy();
         ItemModule coreContents = team.items().copy();

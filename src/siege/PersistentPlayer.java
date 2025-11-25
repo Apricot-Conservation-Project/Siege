@@ -14,6 +14,7 @@ public class PersistentPlayer {
     public boolean online;
     public long lastSeen;
     public long lastActed;
+    public long lastAttemptedCore;
     public Player currentPlayer;
     public static Seq<PersistentPlayer> players = new Seq<>();
 
@@ -43,6 +44,7 @@ public class PersistentPlayer {
         online = true;
         lastActed = System.currentTimeMillis();
         lastSeen = System.currentTimeMillis();
+        lastAttemptedCore = 0;
         players.add(this);
     }
 
