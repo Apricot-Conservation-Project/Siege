@@ -28,6 +28,7 @@ public class UnitOwner {
         for (UnitOwner unit : unitOwners) unit.updateUnit();
 
         if (!Gamedata.gameStarted) return;
+        if (Gamedata.gameOver) return;
 
         if (previousDeadZoneCheck == 0L) {
             previousDeadZoneCheck = System.currentTimeMillis() - (1000 / 60);
