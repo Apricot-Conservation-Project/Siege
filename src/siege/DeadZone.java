@@ -23,7 +23,7 @@ public final class DeadZone {
     private static boolean updatingDeadZone = false;
     private static int updateIndex = 0;
     // How many ticks should writing the dead zone be staggered across?
-    private static final int UPDATE_DIVISIONS = 1000;
+    private static final int UPDATE_DIVISIONS = 2500;
 
     /**
      * This should be called once every tick.
